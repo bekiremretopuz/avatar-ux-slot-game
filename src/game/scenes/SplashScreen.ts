@@ -3,6 +3,8 @@ import gsap from "gsap";
 import { GAME_HEIGHT, GAME_WIDTH } from "../../core/managers/DisplayManager";
 import { MainScene } from "./MainScene";
 import { GAME_CONFIG } from "../misc/const";
+import { game } from "../../main";
+import { GameEvent } from "../../core";
 
 /**
  * Handles the game's entry point: asset loading, splash UI, and transition to gameplay.
@@ -187,7 +189,14 @@ export class SplashScreen extends Container {
         this.parent.addChild(mainScene);
 
         // Simple cross-fade between splash and gameplay
-        gsap.timeline({ onComplete: () => this.destroy({ children: true }) })
+        gsap.timeline({
+            onStart: () => {
+                game.events.emit(GameEvent.GAME_SHOW_MAIN_SCREEN);
+            },
+            onComplete: () => {
+                this.destroy({ children: true });
+            },
+        })
             .to(this, { alpha: 0, duration: 0.6, ease: "power2.out" }, 0)
             .to(mainScene, { alpha: 1, duration: 0.6, ease: "power2.out" }, 0);
     }

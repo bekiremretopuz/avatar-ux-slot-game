@@ -8,9 +8,11 @@ import { MACHINE_EVENTS } from "../../game/components/slot/Machine";
 export const GameEvent = {
     //todo: it should be extendable for the game event from client. (global augmentation ?? idk)
     APP_START: "app:start",
-    MACHINE_ANIMATION_STATUS: "game:machine-animation-status",
-    FIXED_UPDATE: "game:fixed-update",
-    SHOW_MAIN_SCREEN: "game:show-main-screen",
+    GAME_MACHINE_ANIMATION_STATUS: "game:machine-animation-status",
+    PHYSICS_FIXED_UPDATE: "game:fixed-update",
+    GAME_SHOW_MAIN_SCREEN: "game:show-main-screen",
+    UI_START_MACHINE: "ui:request-start-machine",
+    UI_STOP_MACHINE: "ui:request-stop-machine",
 } as const;
 
 /** * Type representing the actual string values of GameEvent.
@@ -24,12 +26,14 @@ export type GameEventValue = (typeof GameEvent)[keyof typeof GameEvent];
  */
 export interface GameEventPayloads {
     [GameEvent.APP_START]: void;
-    [GameEvent.MACHINE_ANIMATION_STATUS]: {
+    [GameEvent.GAME_MACHINE_ANIMATION_STATUS]: {
         status: MACHINE_EVENTS;
         column?: number;
     };
-    [GameEvent.FIXED_UPDATE]: { delta: Ticker };
-    [GameEvent.SHOW_MAIN_SCREEN]: void;
+    [GameEvent.PHYSICS_FIXED_UPDATE]: { delta: Ticker };
+    [GameEvent.GAME_SHOW_MAIN_SCREEN]: void;
+    [GameEvent.UI_START_MACHINE]: { betAmount: number };
+    [GameEvent.UI_STOP_MACHINE]: void;
 }
 
 /**

@@ -44,7 +44,7 @@ export class CoreBoot {
             width: "100vw",
             height: "100vh",
             zIndex: "9999",
-            pointerEvents: "none", // Allow Pixi interactions below
+            pointerEvents: "none",
             display: "block",
             visibility: "visible",
         });
@@ -56,9 +56,7 @@ export class CoreBoot {
             <GameUI
                 fixedBetAmount={GAME_CONFIG.FIXED_BET_AMOUNT}
                 balance={GAME_CONFIG.INITIAL_CREDITS}
-                onSpin={(bet) => {
-                    console.log("Spin triggered:", bet);
-                }}
+                onSpin={(_bet) => {}}
             />,
         );
 

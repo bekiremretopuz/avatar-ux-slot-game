@@ -41,7 +41,7 @@ export class DisplayManager {
 
         // For pyhsics update.
         this.app.ticker.add((delta) => {
-            game.events.emit(GameEvent.FIXED_UPDATE, { delta });
+            game.events.emit(GameEvent.PHYSICS_FIXED_UPDATE, { delta });
         });
     }
 

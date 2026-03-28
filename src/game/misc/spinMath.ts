@@ -25,30 +25,28 @@ export type SymbolId =
     | "9";
 
 // --- Static Configuration (Pre-calculated for performance) ---
-const WEIGHTS: Record<string, number> = {
+
+const WEIGHTS: Record<SymbolId, number> = {
     BONUS: 2,
-    H1: 6,
+    H1: 5,
     H2: 8,
     H3: 10,
     H4: 12,
-    H5: 14,
-    H6: 16,
-    M1: 25,
-    M2: 30,
-    M3: 35,
-    M4: 40,
-    M5: 45,
-    M6: 50,
-    A: 70,
-    K: 80,
-    Q: 90,
-    J: 100,
-    10: 110,
-    9: 120,
+    H5: 15,
+    H6: 18,
+    M1: 20,
+    M2: 25,
+    M3: 30,
+    M4: 35,
+    M5: 40,
+    M6: 45,
+    A: 150,
+    K: 150,
+    Q: 150,
+    J: 150,
+    10: 150,
+    9: 150,
 };
-
-const SYMBOL_KEYS = Object.keys(WEIGHTS) as SymbolId[];
-const TOTAL_WEIGHT = Object.values(WEIGHTS).reduce((a, b) => a + b, 0);
 
 const PAY: any = {
     BONUS: { 3: 200, 4: 1000, 5: 5000 },
@@ -72,20 +70,21 @@ const PAY: any = {
     9: { 3: 1, 4: 3, 5: 20 },
 };
 
+const SYMBOL_KEYS = Object.keys(WEIGHTS) as SymbolId[];
+const TOTAL_WEIGHT = Object.values(WEIGHTS).reduce((a, b) => a + b, 0);
+
 export class SlotMath {
     /**
      * Entry point for a spin. Generates grid and calculates all wins.
      */
     public static spin(bet: number = 1) {
         const { col, row } = REEL_CONFIGS.machine.dimension;
-
         // Generate grid using weighted RNG
         const grid = Array.from({ length: col }, () =>
             Array.from({ length: row }, () => this.getSymbol()),
         );
 
         const { totalWin, details } = this.calculateWins(grid, Math.floor(bet));
-
         return { grid, totalWin, winningDetails: details };
     }
 
@@ -94,31 +93,30 @@ export class SlotMath {
      */
     private static calculateWins(grid: SymbolId[][], bet: number) {
         const colCount = grid.length;
-
         const details = [...new Set(grid[0])]
             .map((symbol) => {
                 const multipliers: number[] = [];
                 const winCoords: { col: number; row: number }[] = [];
 
                 for (let c = 0; c < colCount; c++) {
-                    const rows = grid[c]
+                    const matchedRows = grid[c]
                         .map((s, r) => (s === symbol ? r : -1))
                         .filter((r) => r !== -1);
-                    if (!rows.length) break;
 
-                    multipliers.push(rows.length);
-                    rows.forEach((r) => winCoords.push({ col: c, row: r }));
+                    if (!matchedRows.length) break;
+
+                    multipliers.push(matchedRows.length);
+                    matchedRows.forEach((r) =>
+                        winCoords.push({ col: c, row: r }),
+                    );
                 }
 
-                // Minimum 3 consecutive reels required
                 if (multipliers.length < 3) return null;
 
                 const ways = multipliers.reduce((a, b) => a * b, 1);
-                const payTable = PAY[symbol];
-
                 // Calculate final integer amount
                 const amount = Math.floor(
-                    (payTable[multipliers.length] || 0) * ways * bet,
+                    (PAY[symbol][multipliers.length] || 0) * ways * bet,
                 );
 
                 return amount > 0
@@ -131,10 +129,9 @@ export class SlotMath {
                       }
                     : null;
             })
-            .filter(Boolean);
+            .filter((d): d is NonNullable<typeof d> => d !== null);
 
-        const totalWin = details.reduce((sum, d) => sum + (d?.amount || 0), 0);
-
+        const totalWin = details.reduce((sum, d) => sum + d.amount, 0);
         return { totalWin, details };
     }
 
