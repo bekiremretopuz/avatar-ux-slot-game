@@ -41,7 +41,7 @@ export class BackgroundAnimations extends Container {
 
     private initLogo(): void {
         const logo = new Sprite(Texture.from("logo_game_small.png"));
-        logo.position.set(1372, 40);
+        logo.position.set(1383, 40);
         this.addChild(logo);
     }
 

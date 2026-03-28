@@ -10,6 +10,7 @@ export const GameEvent = {
     APP_START: "app:start",
     MACHINE_ANIMATION_STATUS: "game:machine-animation-status",
     FIXED_UPDATE: "game:fixed-update",
+    SHOW_MAIN_SCREEN: "game:show-main-screen",
 } as const;
 
 /** * Type representing the actual string values of GameEvent.
@@ -28,6 +29,7 @@ export interface GameEventPayloads {
         column?: number;
     };
     [GameEvent.FIXED_UPDATE]: { delta: Ticker };
+    [GameEvent.SHOW_MAIN_SCREEN]: void;
 }
 
 /**

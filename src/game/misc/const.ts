@@ -1,7 +1,7 @@
 // Default fallback values - Updated dynamically from game-config.json during Splash screen
 export const GAME_CONFIG = {
-    INITIAL_CREDITS: 2,
-    FIXED_BET_AMOUNT: 1,
+    INITIAL_CREDITS: 10000,
+    FIXED_BET_AMOUNT: 100,
     LOCALES: "en-US",
     CURRENCY: "USD",
 };

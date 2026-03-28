@@ -5,6 +5,7 @@ export const manifest: AssetsManifest = {
         {
             name: "splash",
             assets: {
+                gameConfig: "assets/config/game-config.json",
                 splashScreenBgAtlas: "assets/images/splash_screen_bg.json",
                 splashScreenAtlas: "assets/images/splash_screen.json",
             },
