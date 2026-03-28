@@ -1,4 +1,6 @@
 import { Application, Graphics } from "pixi.js";
+import { game } from "../../main";
+import { GameEvent } from "..";
 
 export const GAME_WIDTH = 1680;
 export const GAME_HEIGHT = 945;
@@ -36,6 +38,11 @@ export class DisplayManager {
 
         // Perform initial layout
         this.resize();
+
+        // For pyhsics update.
+        this.app.ticker.add((delta) => {
+            game.events.emit(GameEvent.FIXED_UPDATE, { delta });
+        });
     }
 
     /**
