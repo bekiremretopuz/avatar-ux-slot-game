@@ -1,4 +1,4 @@
-import { Spine, TrackEntry } from "@esotericsoftware/spine-pixi-v8";
+import { Spine, TrackEntry, Animation } from "@esotericsoftware/spine-pixi-v8";
 
 /**
  * Options for playing Spine animations
@@ -65,6 +65,29 @@ class SpineManager {
         };
 
         return entry;
+    }
+
+    // ---------------- READ ANIMATIONS ----------------
+
+    /**
+     * Returns a list of animation names for the given Spine key
+     */
+    readAnimations(key: string): string[] {
+        const spine = this.spines.get(key);
+        if (!spine) return [];
+
+        return spine.skeleton.data.animations.map(
+            (anim: Animation) => anim.name,
+        );
+    }
+
+    hasAnimation(key: string, animation: string): boolean {
+        const spine = this.spines.get(key);
+        if (!spine) return false;
+
+        return spine.skeleton.data.animations.some(
+            (anim) => anim.name === animation,
+        );
     }
 
     // ---------------- DESTROY ----------------

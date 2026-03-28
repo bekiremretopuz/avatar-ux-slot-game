@@ -1,0 +1,1 @@
+export { SpinePrefab } from "./SpinePrefab";
