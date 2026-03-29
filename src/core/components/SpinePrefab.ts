@@ -34,8 +34,20 @@ export class SpinePrefab extends Container {
         if (scale) this.spine.scale.copyFrom(scale);
     }
 
-    play(animation: string, options?: PlayOptions) {
-        return spineManager.play(this.key, animation, options);
+    /**
+     * Plays an animation and optionally queues the next one (e.g., back to IDLE)
+     * * @param animation The primary animation to play.
+     * @param options Standard Spine play options (loop, speed etc.).
+     * @param queueAnimation Optional animation to play immediately after the first one completes.
+     */
+    play(animation: string, options?: PlayOptions, queueAnimation?: string) {
+        const trackEntry = spineManager.play(this.key, animation, options);
+
+        if (queueAnimation) {
+            this.spine.state.addAnimation(0, queueAnimation, true, 0);
+        }
+
+        return trackEntry;
     }
 
     setPivotAlign(

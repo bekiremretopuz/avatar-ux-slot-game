@@ -45,18 +45,18 @@ export const GameUI: React.FC<GameUIProps> = ({ fixedBetAmount, balance }) => {
         };
 
         const handlePlayerWin = (
-            payload: GameEventPayloads[typeof GameEvent.GAME_PLAYER_WIN],
+            payload: GameEventPayloads[typeof GameEvent.UI_WIN_UPDATE],
         ) => {
             setCurrentWin(payload.amount);
             setCurrentBalance((prev) => prev + payload.amount);
         };
 
         game.events.on(GameEvent.UI_START_MACHINE, handleSpinStart);
-        game.events.on(GameEvent.GAME_PLAYER_WIN, handlePlayerWin);
+        game.events.on(GameEvent.UI_WIN_UPDATE, handlePlayerWin);
 
         return () => {
             game.events.off(GameEvent.UI_START_MACHINE, handleSpinStart);
-            game.events.off(GameEvent.GAME_PLAYER_WIN, handlePlayerWin);
+            game.events.off(GameEvent.UI_WIN_UPDATE, handlePlayerWin);
         };
     }, []);
 

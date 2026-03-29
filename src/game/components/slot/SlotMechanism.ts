@@ -97,10 +97,12 @@ export class SlotMechanism extends Container {
         // 3. Trigger the floating text animation
         if (totalWin > 0) {
             this._winText.showWin(totalWin, () => {
-                game.events.emit(GameEvent.GAME_PLAYER_WIN, {
+                game.events.emit(GameEvent.UI_WIN_UPDATE, {
                     amount: totalWin,
                 });
             });
+            // 4. Character animation on win case
+            game.events.emit(GameEvent.GAME_WIN_UPDATE);
         }
     }
 

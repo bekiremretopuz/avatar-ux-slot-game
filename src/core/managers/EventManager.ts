@@ -10,9 +10,10 @@ export const GameEvent = {
     GAME_MACHINE_ANIMATION_STATUS: "game:machine-animation-status",
     PHYSICS_FIXED_UPDATE: "game:fixed-update",
     GAME_SHOW_MAIN_SCREEN: "game:show-main-screen",
+    GAME_WIN_UPDATE: "game:game-player-update",
     UI_START_MACHINE: "ui:request-start-machine",
     UI_STOP_MACHINE: "ui:request-stop-machine",
-    GAME_PLAYER_WIN: "game:player-win",
+    UI_WIN_UPDATE: "game:ui-player-update",
 } as const;
 
 /** * Type representing the actual string values of GameEvent.
@@ -30,11 +31,12 @@ export interface GameEventPayloads {
         status: MACHINE_EVENTS;
         column?: number;
     };
-    [GameEvent.PHYSICS_FIXED_UPDATE]: { delta: Ticker };
     [GameEvent.GAME_SHOW_MAIN_SCREEN]: void;
+    [GameEvent.GAME_WIN_UPDATE]: void;
+    [GameEvent.PHYSICS_FIXED_UPDATE]: { delta: Ticker };
     [GameEvent.UI_START_MACHINE]: { betAmount: number };
     [GameEvent.UI_STOP_MACHINE]: void;
-    [GameEvent.GAME_PLAYER_WIN]: { amount: number };
+    [GameEvent.UI_WIN_UPDATE]: { amount: number };
 }
 
 /**

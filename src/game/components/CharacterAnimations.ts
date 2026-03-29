@@ -1,5 +1,6 @@
 import { Container } from "pixi.js";
-import { SpinePrefab } from "../../core";
+import { GameEvent, SpinePrefab } from "../../core";
+import { game } from "../../main";
 
 export enum CharacterAnimation {
     BONUS_ANTICIPATION = "character_bonus_anticipation",
@@ -31,6 +32,22 @@ export class CharacterAnimations extends Container {
         this.spine.setPivotAlign("center", "center");
         this.spine.play(CharacterAnimation.IDLE, { loop: true });
 
+        game.events.on(GameEvent.UI_START_MACHINE, () => {
+            this.play(
+                CharacterAnimation.BONUS_ANTICIPATION,
+                true,
+                CharacterAnimation.IDLE,
+            );
+        });
+
+        game.events.on(GameEvent.GAME_WIN_UPDATE, () => {
+            this.play(
+                CharacterAnimation.BONUS_ANTICIPATION_WIN,
+                false,
+                CharacterAnimation.IDLE,
+            );
+        });
+
         this.addChild(this.spine);
     }
 
@@ -43,15 +60,22 @@ export class CharacterAnimations extends Container {
         stateData.defaultMix = 0.2;
         stateData.setMix(
             CharacterAnimation.IDLE,
-            CharacterAnimation.SMALL_WIN,
+            CharacterAnimation.BONUS_ANTICIPATION,
             0.1,
         );
     }
 
     /**
      * Plays a specific character animation.
+     * @param animation The primary animation to play.
+     * @param loop Whether the animation should repeat.
+     * @param queueAnimation Optional animation to play immediately after the first one completes.
      */
-    public play(animation: CharacterAnimation, loop: boolean = true): void {
-        this.spine.play(animation, { loop });
+    public play(
+        animation: CharacterAnimation,
+        loop: boolean = true,
+        queueAnimation?: CharacterAnimation,
+    ): void {
+        this.spine.play(animation, { loop }, queueAnimation);
     }
 }
