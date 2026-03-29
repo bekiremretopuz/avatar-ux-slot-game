@@ -28,8 +28,19 @@ export class CoreBoot {
     public async init(SplashScreenClass: SplashScreenConstructor) {
         // Initialize Pixi app with background and responsive resize
         await this.app.init({
-            background: "#130c0f",
-            resizeTo: window,
+            background: "#130c0f", // Canvas background color
+            resizeTo: window, // Auto-resize to browser window
+            resolution: Math.min(window.devicePixelRatio || 1, 2), // Cap resolution at 2x for Retina
+            autoDensity: true, // Scales canvas CSS for crisp rendering
+            antialias: true, // Smooths out vector edges
+            roundPixels: true, // Prevents blurry textures by rounding coords
+            preserveDrawingBuffer: false, // Better performance (no screenshot support)
+            premultipliedAlpha: true, // Better transparency blending
+            preferWebGLVersion: 2, // Forces WebGL 2 if available
+            powerPreference: "high-performance", // Prioritizes raw GPU power
+            backgroundAlpha: 1, // Opaque background (improves performance)
+            clearBeforeRender: true, // Prevents ghosting/trails
+            hello: true, // Logs PixiJS version to console
         });
 
         const gameContainer = document.getElementById("app");

@@ -27,7 +27,7 @@ export class Reel extends Container {
     /** Initial symbol creation based on pseudo configurations */
     private createSymbols() {
         for (let i = -1; i < REEL_CONFIGS.machine.dimension.row; i++) {
-            const rowSymbols = REEL_CONFIGS.machine.presudo[i + 1];
+            const rowSymbols = REEL_CONFIGS.machine.pseudo[i + 1];
             const type =
                 rowSymbols[Math.floor(Math.random() * rowSymbols.length)];
             const symbol = new Symbols(type, i, this.column);
@@ -40,7 +40,7 @@ export class Reel extends Container {
     /** Triggered when the spin button is pressed */
     startSpin() {
         this._progress = 0;
-        this.speed = 0.02;
+        this.speed = 0.1; // starting speed
         this.stop = false;
         this.resetPositions();
         this._startTime = Date.now() / 1000;
@@ -118,7 +118,8 @@ export class Reel extends Container {
     /** Logic triggered just before the reel comes to a full stop */
     private preStop() {
         this.stop = true;
-        gsap.delayedCall(1.2 - this._speedFactor, () =>
+        // Mark the next reel to stop after a short delay to create a staggered stopping effect
+        gsap.delayedCall(1.1 - this._speedFactor, () =>
             this.machine.markNextToStop(this.column),
         );
         this.machine.reelStopping(this.column);

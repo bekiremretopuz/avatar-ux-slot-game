@@ -51,7 +51,7 @@ export class SlotMechanism extends Container {
 
         this._machine.startSpin();
 
-        this._spinDelayCall = gsap.delayedCall(3.5, this.executeStop);
+        this._spinDelayCall = gsap.delayedCall(0.6, this.executeStop);
     };
 
     /**

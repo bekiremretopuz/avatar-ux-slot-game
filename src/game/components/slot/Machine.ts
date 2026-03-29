@@ -3,7 +3,6 @@ import { game } from "../../../main";
 import { REEL_CONFIGS } from "../../misc/const";
 import { Reel } from "./Reel";
 import { Symbols } from "./Symbols";
-import gsap from "gsap";
 
 /** Represents the possible states of an individual reel */
 enum REEL_STATES {
@@ -33,7 +32,7 @@ export class Machine {
     private pseudo: string[][] = [];
 
     constructor() {
-        this.pseudo = REEL_CONFIGS.machine.presudo;
+        this.pseudo = REEL_CONFIGS.machine.pseudo;
         this._initMachine();
     }
 
@@ -75,9 +74,7 @@ export class Machine {
         if (isQuickStop) {
             // Rapid staggered stop: release all columns with a 50ms delay between each
             this._reels.forEach((_, i) => {
-                gsap.delayedCall(i * 0.05, () => {
-                    this._stopFlags[i] = true;
-                });
+                this._stopFlags[i] = true;
             });
         } else {
             // Sequential stop: only release the first column; others follow via markNextToStop
