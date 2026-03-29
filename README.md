@@ -21,6 +21,7 @@ Key flow:
 - `React` — overlay UI rendered on top of Pixi canvas
 - `@esotericsoftware/spine-pixi-v8` — Spine animation support
 - `vite-plugin-static-copy` — copies static assets into `dist/`
+- Implements Dependency Injection `(DI)` via a custom @Inject decorator to manage singletons and decouple game components.
 
 ## Project Structure
 
@@ -63,6 +64,7 @@ Key flow:
 - After 3.5 seconds, the spin either stops automatically or can be triggered with quick stop
 - When the spin finishes, winning symbols are highlighted and `FloatingWinText` animates the payout
 - The balance is updated through the React `GameUI`
+- This slot machine uses a 243 Ways to Win payout system, calculated by multiplying the frequency of matching symbols across consecutive reels from left to right, starting from the first reel.
 
 ## Core Components
 

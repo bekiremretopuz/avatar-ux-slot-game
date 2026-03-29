@@ -9,13 +9,12 @@ import { updateUIWin } from "../../../core/dom-components/GameUI";
 import { FloatingWinText } from "../FloatingText";
 
 export class SlotMechanism extends Container {
-    private _machine: Machine;
+    private _machine!: Machine;
     private _currentResponse: SpinResult | null = null;
     private _spinDelayCall: gsap.core.Animation | null = null;
-    private _winText: FloatingWinText;
+    private _winText!: FloatingWinText;
 
-    constructor() {
-        super();
+    public postConstruct(): void {
         this._setupFrame();
         this._machine = new Machine();
 
@@ -40,7 +39,6 @@ export class SlotMechanism extends Container {
             }
         });
     }
-
     /**
      * Triggered when the player clicks the Spin button.
      * Handles state clearing and communicates with the game core for results.

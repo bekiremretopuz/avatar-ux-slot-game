@@ -1,26 +1,20 @@
 {
     "compilerOptions": {
-        "target": "ES2020",
-        "useDefineForClassFields": true,
-        "module": "ESNext",
-        "lib": ["ES2020", "DOM", "DOM.Iterable"],
-        "skipLibCheck": true,
-        "jsx": "react-jsx",
-        /* Bundler mode */
-        "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true,
-        "isolatedModules": true,
-        "moduleDetection": "force",
-        "noEmit": true,
-
-        /* Linting */
-        "strict": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noFallthroughCasesInSwitch": true,
-        "noUncheckedSideEffectImports": true,
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true
+        "target": "ES2020", // Target modern JavaScript.
+        "module": "ESNext", // Use modern imports/exports.
+        "lib": ["ES2020", "DOM", "DOM.Iterable"], // Enable browser and modern JS features.
+        "skipLibCheck": true, // Ignore errors in node_modules (faster).
+        "jsx": "react-jsx", // Support React JSX automatically.
+        "moduleResolution": "bundler", // Match file paths like Vite/Webpack do.
+        "allowImportingTsExtensions": true, // Allow using .ts in import paths.
+        "isolatedModules": true, // Safe single-file transpilation.
+        "moduleDetection": "force", // Treat every file as a module.
+        "noEmit": true, // TS only checks types; doesn't output JS.
+        "strict": true, // Enable best and strictest type safety.
+        "noUnusedLocals": true, // Error on unused local variables.
+        "noUnusedParameters": true, // Error on unused function arguments.
+        "noFallthroughCasesInSwitch": true, // Error on missing break in switch-case.
+        "noUncheckedSideEffectImports": true // Ensure imported assets (like CSS) actually exist.
     },
-    "include": ["src"]
+    "include": ["src/**/*"] // Only check files inside the src folder.
 }

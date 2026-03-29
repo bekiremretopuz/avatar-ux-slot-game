@@ -15,11 +15,9 @@ export enum CharacterAnimation {
  * Manages character-specific Spine animations and transitions.
  */
 export class CharacterAnimations extends Container {
-    private readonly spine: SpinePrefab;
+    private spine!: SpinePrefab;
 
-    constructor() {
-        super();
-
+    public postConstruct(): void {
         this.spine = new SpinePrefab({
             key: "characterAnimation",
             atlas: "characterAtlas",

@@ -22,8 +22,7 @@ export class BackgroundAnimations extends Container {
         "multiplier_counter_cloud3.png",
     ];
 
-    constructor() {
-        super();
+    public postConstruct(): void {
         this.initStaticLayers();
         this.initUI();
         this.initClouds();
