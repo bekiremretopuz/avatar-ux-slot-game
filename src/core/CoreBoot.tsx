@@ -86,6 +86,12 @@ export class CoreBoot {
             ["splash"],
         );
 
+        const preloader = document.getElementById("preloader");
+        if (preloader) {
+            // Remove preloader from DOM after splash preloader assets are loaded
+            preloader.remove();
+        }
+
         // --- Create and display splash screen ---
         this.splashScreen = new SplashScreenClass();
         this.app.stage.addChild(this.splashScreen);
