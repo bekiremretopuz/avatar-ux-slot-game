@@ -45,7 +45,7 @@ export class Reel extends Container {
         this.resetPositions();
         this._startTime = Date.now() / 1000;
         // Listen to fixed update for smooth rotation
-        game.events.on(GameEvent.FIXED_UPDATE, this.resolveSpinning);
+        game.events.on(GameEvent.PHYSICS_FIXED_UPDATE, this.resolveSpinning);
         this.machine.reelSpinning(this.column);
     }
 
@@ -65,7 +65,10 @@ export class Reel extends Container {
     /** Main loop while the reel is accelerating or at constant speed */
     private resolveSpinning = () => {
         if (this.machine.shouldStop(this.column) && this.progress >= 1) {
-            game.events.off(GameEvent.FIXED_UPDATE, this.resolveSpinning);
+            game.events.off(
+                GameEvent.PHYSICS_FIXED_UPDATE,
+                this.resolveSpinning,
+            );
             const corr = Math.ceil(this.progress) - this.progress;
             this.progress += corr;
             this.resolveStopping(0);
@@ -99,7 +102,7 @@ export class Reel extends Container {
             this.progress = Math.min(end + bounce, this.progress + ease);
 
             if (this.progress >= end + bounce) {
-                game.events.off(GameEvent.FIXED_UPDATE, decel);
+                game.events.off(GameEvent.PHYSICS_FIXED_UPDATE, decel);
                 // Snap back to final position with a small bounce ease
                 gsap.to(this, {
                     progress: end,
@@ -108,7 +111,7 @@ export class Reel extends Container {
                 });
             }
         };
-        game.events.on(GameEvent.FIXED_UPDATE, decel);
+        game.events.on(GameEvent.PHYSICS_FIXED_UPDATE, decel);
         decel();
     }
 

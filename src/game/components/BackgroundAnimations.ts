@@ -65,7 +65,7 @@ export class BackgroundAnimations extends Container {
     private createWaysSign(): void {
         const container = new Container();
         const sign = new Sprite(Texture.from("counter_ways.png"));
-        sign.position.set(1382, 290);
+        sign.position.set(1388, 290);
 
         const text = new Text({
             text: "243",

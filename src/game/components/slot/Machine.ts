@@ -1,11 +1,11 @@
 import { GameEvent } from "../../../core";
 import { game } from "../../../main";
-import { GAME_CONFIG, REEL_CONFIGS } from "../../misc/const";
-import { SlotMath } from "../../misc/spinMath";
+import { REEL_CONFIGS } from "../../misc/const";
 import { Reel } from "./Reel";
 import { Symbols } from "./Symbols";
+import gsap from "gsap";
 
-// Reel states
+/** Represents the possible states of an individual reel */
 enum REEL_STATES {
     IDLE,
     SPINNING,
@@ -13,7 +13,7 @@ enum REEL_STATES {
     STOPPED,
 }
 
-// Machine events
+/** Events emitted by the machine to track global animation status */
 export enum MACHINE_EVENTS {
     SPINNING = "SPINNING",
     STOPPING = "REEL_STOPPING",
@@ -22,151 +22,163 @@ export enum MACHINE_EVENTS {
 }
 
 export class Machine {
-    private _symbols: Symbols[] = []; // All symbols from reels
-    private _reels: Reel[] = []; // Reel instances
-    private _reelPositions: number[] = []; // Current symbol index per reel
-    private _stopFlags: boolean[] = []; // Flags indicating reels ready to stop
-    private _reelStates: REEL_STATES[] = []; // Current state of each reel
-    private _finalSymbols?: string[][]; // Target symbols after spin
-    private _spinTimeFactor = 1; // Speed multiplier for stopping
-    private _minSpin = 2.5; // Minimum spin duration in seconds
-    private _defSpin = 3.5; // Default spin duration in seconds
-    private pseudo: string[][] = []; // Symbol grid for reels
+    private _symbols: Symbols[] = [];
+    private _reels: Reel[] = [];
+    private _reelPositions: number[] = [];
+    private _stopFlags: boolean[] = [];
+    private _reelStates: REEL_STATES[] = [];
+    private _finalSymbols?: string[][];
+    private _spinTimeFactor = 1;
+    private _minSpin = 0.1; // Minimum allowed duration before a reel can land
+    private pseudo: string[][] = [];
 
     constructor() {
-        const cols = REEL_CONFIGS.machine.dimension.col;
         this.pseudo = REEL_CONFIGS.machine.presudo;
+        this._initMachine();
+    }
 
-        // --- Create reels ---
+    /** Sets up reels, flags, and initial states */
+    private _initMachine(): void {
+        const cols = REEL_CONFIGS.machine.dimension.col;
+
         this._reels = Array.from({ length: cols }, (_, i) => {
             const reel = new Reel(this, i);
-            reel.position.set(364 + i, 350); // Set reel position
-            this._symbols.push(...reel.symbols); // Collect symbols
-            reel.addChild(...reel.symbols); // Add symbols to display
+            // X: 364 is the starting offset, i is incremented per column
+            // Y: 350 is the vertical anchor point
+            reel.position.set(364 + i, 350);
+
+            this._symbols.push(...reel.symbols);
+            reel.addChild(...reel.symbols);
             return reel;
         });
 
-        // Initialize flags and states
         this._stopFlags = Array(cols).fill(false);
         this._reelPositions = Array(cols).fill(0);
         this._reelStates = Array(cols).fill(REEL_STATES.IDLE);
-
-        // --- Generate test spin result ---
-        const response2 = SlotMath.spin(GAME_CONFIG.FIXED_BET_AMOUNT);
-
-        // Start spin after 2 seconds
-        setTimeout(() => this.startSpin(), 2000);
-
-        // Stop spin after 7 seconds using generated symbols
-        setTimeout(() => this.stopSpin(response2.grid), 7000);
-
-        console.log(response2); // Log spin result
     }
 
-    /** Start all reels spinning */
-    startSpin() {
+    /** Resets flags and triggers the spin animation for all reels */
+    public startSpin(): void {
         this._stopFlags.fill(false);
         this._finalSymbols = undefined;
+        this._reelStates.fill(REEL_STATES.SPINNING);
         this._reels.forEach((r) => r.startSpin());
     }
 
-    /** Stop reels and set final symbols */
-    stopSpin(symbols: string[][]) {
+    /** * Initiates the stopping sequence.
+     * @param symbols The target grid to land on.
+     * @param isQuickStop If true, triggers a rapid staggered stop across all columns.
+     */
+    public stopSpin(symbols: string[][], isQuickStop: boolean = false): void {
         this._finalSymbols = symbols;
-        this._stopFlags[0] = true; // Enable first reel to stop
+
+        if (isQuickStop) {
+            // Rapid staggered stop: release all columns with a 50ms delay between each
+            this._reels.forEach((_, i) => {
+                gsap.delayedCall(i * 0.05, () => {
+                    this._stopFlags[i] = true;
+                });
+            });
+        } else {
+            // Sequential stop: only release the first column; others follow via markNextToStop
+            this._stopFlags[0] = true;
+        }
     }
 
-    /** Check if a reel should stop */
-    shouldStop(col: number) {
+    /** Checks if a specific reel has met the criteria to start landing */
+    public shouldStop(col: number): boolean {
         if (!this._finalSymbols) return false;
+
         const elapsed = Date.now() / 1000 - this._reels[col].startTime;
-        return (
-            elapsed >= this._minSpin &&
-            elapsed >= this._defSpin &&
-            this._stopFlags[col]
-        );
+        return elapsed >= this._minSpin && this._stopFlags[col];
     }
 
-    /** Get the final symbol for a specific reel and row */
-    getFinalSymbolAt(col: number, row: number) {
-        if (!this._finalSymbols) throw new Error("final symbols not ready");
+    /** Returns the target symbol string for a specific grid position */
+    public getFinalSymbolAt(col: number, row: number): string {
+        if (!this._finalSymbols)
+            throw new Error("Machine: Final symbols are not set.");
         const rows = REEL_CONFIGS.machine.dimension.row;
         return this._finalSymbols[col][(row + rows) % rows];
     }
 
-    /** Mark the next reel to stop */
-    markNextToStop(col: number) {
-        this._stopFlags[(col + 1) % this._reels.length] = true;
+    /** Signals the next column in line that it is allowed to stop */
+    public markNextToStop(col: number): void {
+        const nextCol = col + 1;
+        if (nextCol < this._reels.length) {
+            this._stopFlags[nextCol] = true;
+        }
     }
 
-    /** Get the next symbol for a reel */
-    getNextSymbolAt(col: number) {
+    /** Retrieves the next symbol from the pseudo-random grid for continuous spinning */
+    public getNextSymbolAt(col: number): string {
         const pos = this._reelPositions[col];
         const symbol = this.pseudo[col][pos];
         this._reelPositions[col] = (pos + 1) % this.pseudo[col].length;
         return symbol;
     }
 
-    /** Check if all reels have stopped */
-    allStopped() {
+    /** Returns true if all reels have reached the STOPPED state */
+    public allStopped(): boolean {
         return this._reelStates.every((s) => s === REEL_STATES.STOPPED);
     }
 
-    /** Emit reel state change and trigger events */
-    private emitReelState(
+    /** Internal helper to update state and notify the game core */
+    private _emitReelState(
         col: number,
         state: REEL_STATES,
         event: MACHINE_EVENTS,
-    ) {
+    ): void {
         this._reelStates[col] = state;
-        game.events.emit(GameEvent.MACHINE_ANIMATION_STATUS, {
+        game.events.emit(GameEvent.GAME_MACHINE_ANIMATION_STATUS, {
             status: event,
             column: col,
         });
     }
 
-    /** Reel started stopping */
-    reelStopping(col: number) {
-        this.emitReelState(col, REEL_STATES.STOPPING, MACHINE_EVENTS.STOPPING);
+    // --- State Notification Hooks (called by individual Reels) ---
+
+    public reelStopping(col: number): void {
+        this._emitReelState(col, REEL_STATES.STOPPING, MACHINE_EVENTS.STOPPING);
     }
 
-    /** Reel started spinning */
-    reelSpinning(col: number) {
-        this.emitReelState(col, REEL_STATES.SPINNING, MACHINE_EVENTS.SPINNING);
+    public reelSpinning(col: number): void {
+        this._emitReelState(col, REEL_STATES.SPINNING, MACHINE_EVENTS.SPINNING);
     }
 
-    /** Reel stopped completely */
-    reelStopped(col: number) {
-        this.emitReelState(col, REEL_STATES.STOPPED, MACHINE_EVENTS.STOPPED);
+    public reelStopped(col: number): void {
+        this._emitReelState(col, REEL_STATES.STOPPED, MACHINE_EVENTS.STOPPED);
+
         if (this.allStopped()) {
-            // Emit complete event if all reels stopped
-            game.events.emit(GameEvent.MACHINE_ANIMATION_STATUS, {
+            game.events.emit(GameEvent.GAME_MACHINE_ANIMATION_STATUS, {
                 status: MACHINE_EVENTS.COMPLETE,
             });
         }
     }
 
-    /** Calculate symbol coordinates on the reel */
-    getSymbolCoordinate(col: number, row: number) {
+    /** Calculates the local coordinates for a symbol within its reel */
+    public getSymbolCoordinate(col: number, row: number) {
         return {
-            x: REEL_CONFIGS.symbol.width * col,
-            y: REEL_CONFIGS.symbol.height * (row - 1),
+            // Genişlik/2 ekleyerek anchor 0.5 olsa bile doğru yere oturmasını sağlıyoruz
+            x: REEL_CONFIGS.symbol.width * col + REEL_CONFIGS.symbol.width / 2,
+            y:
+                REEL_CONFIGS.symbol.height * (row - 1) +
+                REEL_CONFIGS.symbol.height / 2,
         };
     }
 
-    /** Spin speed factor getter/setter */
-    get spinTimeFactor() {
+    // --- Getters & Setters ---
+
+    public get spinTimeFactor(): number {
         return this._spinTimeFactor;
     }
-    set spinTimeFactor(v: number) {
+    public set spinTimeFactor(v: number) {
         this._spinTimeFactor = v;
     }
 
-    /** Getters for reels and symbols */
-    get reels() {
+    public get reels(): Reel[] {
         return this._reels;
     }
-    get symbols() {
+    public get symbols(): Symbols[] {
         return this._symbols;
     }
 }

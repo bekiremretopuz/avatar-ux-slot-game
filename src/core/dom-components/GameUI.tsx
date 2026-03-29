@@ -8,7 +8,7 @@ import { SpinButton } from "./SpinButton";
 import { footerBarStyle, getSafeAreaStyle } from "./uiStyles";
 
 // --- EXTERNAL ACCESS ---
-// Bu değişkenler SlotMechanism gibi TS dosyalarından import edilip direkt çağrılabilir.
+// These variables can be imported and called directly from TS files like SlotMechanism or Machine.
 export let updateUIBalance: (val: number) => void = () => {};
 export let updateUIWin: (val: number) => void = () => {};
 export let updateUIBet: (val: number) => void = () => {};
@@ -24,12 +24,12 @@ export const GameUI: React.FC<GameUIProps> = ({
     fixedBetAmount,
     balance,
 }) => {
-    // İstatistik State'leri
+    // Stat States
     const [currentBalance, setCurrentBalance] = useState(balance);
     const [currentWin, setCurrentWin] = useState(0);
     const [bet, setBet] = useState(fixedBetAmount);
 
-    // Görünürlük ve Ölçeklendirme State'leri
+    // Visibility and Scaling States
     const [visible, setVisible] = useState(false);
     const [transform, setTransform] = useState({
         scale: 1,
@@ -37,7 +37,7 @@ export const GameUI: React.FC<GameUIProps> = ({
         top: "50%",
     });
 
-    // 1. Dışarıdan gelen Prop'ları State ile senkronize et
+    // 1. Sync Props with React States
     useEffect(() => {
         setCurrentBalance(balance);
     }, [balance]);
@@ -46,18 +46,18 @@ export const GameUI: React.FC<GameUIProps> = ({
         setBet(fixedBetAmount);
     }, [fixedBetAmount]);
 
-    // 2. Dış Dosyalardan Erişilecek Fonksiyonları Bağla
+    // 2. Bind Functions for External Access
     useEffect(() => {
-        // Sadece bakiyeyi güncellemek için (Örn: Spin başında bakiye düşürme)
+        // Direct balance override (e.g., deducting bet at the beginning of a spin)
         updateUIBalance = (newTotal: number) => {
             setCurrentBalance(newTotal);
         };
 
-        // Kazanç geldiğinde hem WIN hanesini güncelle hem de mevcut bakiyeye ekle
+        // Handles win updates: updates both the WIN box and adds to the current balance
         updateUIWin = (winAmount: number) => {
             setCurrentWin(winAmount);
 
-            // Functional update: prev her zaman React'teki en güncel bakiyeyi tutar
+            // Functional update: 'prev' always guarantees we modify the most recent React state value
             setCurrentBalance((prev) => {
                 const finalBalance = prev + winAmount;
                 console.log("UI Sync: New Balance after win:", finalBalance);
@@ -68,7 +68,7 @@ export const GameUI: React.FC<GameUIProps> = ({
         updateUIBet = (val: number) => setBet(val);
 
         return () => {
-            // Unmount olduğunda referansları temizle (Memory leak önleyici)
+            // Cleanup references on unmount to prevent memory leaks
             updateUIBalance = updateUIWin = updateUIBet = () => {};
         };
     }, []);
@@ -77,7 +77,7 @@ export const GameUI: React.FC<GameUIProps> = ({
     const updateLayout = useCallback(() => {
         const width = window.innerWidth;
         const height = window.innerHeight;
-        // Tasarım boyutlarımıza göre (GAME_WIDTH/HEIGHT) ölçekleme çarpanını bul
+        // Find the scale multiplier based on the default canvas design size
         const scale = Math.min(width / GAME_WIDTH, height / GAME_HEIGHT);
         setTransform({ scale, left: `${width / 2}px`, top: `${height / 2}px` });
     }, []);
@@ -88,6 +88,7 @@ export const GameUI: React.FC<GameUIProps> = ({
         game.events.on(GameEvent.GAME_SHOW_MAIN_SCREEN, showUI);
         window.addEventListener("resize", updateLayout);
 
+        // Directly show the UI if the game scene is already fully loaded
         if ((window as any).isGameReady) setVisible(true);
 
         updateLayout();
@@ -98,13 +99,13 @@ export const GameUI: React.FC<GameUIProps> = ({
         };
     }, [updateLayout, showUI]);
 
-    // 4. Spin Başlatma (SpinButton'dan tetiklenir)
+    // 4. Spin Initiation Trigger (Triggered when child SpinButton handles click)
     const handleSpinInitiated = () => {
-        // Yeni spin başlarken Win hanesini temizle
+        // Reset the win field on every new spin
         setCurrentWin(0);
-        // Bakiyeyi bahis kadar düşür
+        // Instantly deduct the bet amount from visual balance
         setCurrentBalance((prev) => prev - bet);
-        // Asıl oyunu (Phaser/Pixi) başlat
+        // Execute the actual game scene spin logic
         onSpin(bet);
     };
 
@@ -112,11 +113,11 @@ export const GameUI: React.FC<GameUIProps> = ({
 
     return (
         <div style={getSafeAreaStyle(transform)}>
-            {/* Main Wrapper */}
+            {/* Main Relative Wrapper */}
             <div
                 style={{ position: "relative", width: "100%", height: "100%" }}
             >
-                {/* FOOTER BAR */}
+                {/* FOOTER OVERLAY BAR */}
                 <div
                     style={{
                         ...footerBarStyle,
@@ -149,8 +150,8 @@ export const GameUI: React.FC<GameUIProps> = ({
                 <div
                     style={{
                         position: "absolute",
-                        right: "25px",
-                        bottom: "145px",
+                        right: "26px",
+                        bottom: "139px",
                         zIndex: 10,
                         filter: "drop-shadow(0px 4px 10px rgba(0,0,0,0.5))",
                         pointerEvents: "auto",
