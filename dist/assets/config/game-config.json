@@ -1,0 +1,8 @@
+{
+    "initialCredits": 10000,
+    "fixedBetAmount": 10,
+    "numberFormat": {
+        "locales": "en-US",
+        "currency": "USD"
+    }
+}

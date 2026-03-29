@@ -1,0 +1,327 @@
+{
+    "frames": {
+        "splash_box.png": {
+            "frame": {
+                "x": 5,
+                "y": 5,
+                "w": 830,
+                "h": 582
+            },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 830,
+                "h": 582
+            },
+            "sourceSize": {
+                "w": 830,
+                "h": 582
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        "splash_feature_3.png": {
+            "frame": {
+                "x": 845,
+                "y": 5,
+                "w": 766,
+                "h": 358
+            },
+            "rotated": false,
+            "trimmed": true,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 766,
+                "h": 358
+            },
+            "sourceSize": {
+                "w": 831,
+                "h": 370
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        "splash_feature_2.png": {
+            "frame": {
+                "x": 1621,
+                "y": 5,
+                "w": 754,
+                "h": 381
+            },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 754,
+                "h": 381
+            },
+            "sourceSize": {
+                "w": 754,
+                "h": 381
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        "splash_screen_loading_progress_bg_back.png": {
+            "frame": {
+                "x": 845,
+                "y": 373,
+                "w": 700,
+                "h": 10
+            },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 700,
+                "h": 10
+            },
+            "sourceSize": {
+                "w": 700,
+                "h": 10
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        "splash_screen_loading_progress_fill.png": {
+            "frame": {
+                "x": 845,
+                "y": 393,
+                "w": 700,
+                "h": 10
+            },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 700,
+                "h": 10
+            },
+            "sourceSize": {
+                "w": 700,
+                "h": 10
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        "splash_feature_1.png": {
+            "frame": {
+                "x": 2385,
+                "y": 5,
+                "w": 595,
+                "h": 493
+            },
+            "rotated": false,
+            "trimmed": true,
+            "spriteSourceSize": {
+                "x": 67,
+                "y": 0,
+                "w": 595,
+                "h": 493
+            },
+            "sourceSize": {
+                "w": 662,
+                "h": 493
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        "splash_screen_loading_progress_bg_front.png": {
+            "frame": {
+                "x": 1555,
+                "y": 396,
+                "w": 539,
+                "h": 30
+            },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 539,
+                "h": 30
+            },
+            "sourceSize": {
+                "w": 539,
+                "h": 30
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        "splash_logo_avatarux.png": {
+            "frame": {
+                "x": 2104,
+                "y": 396,
+                "w": 186,
+                "h": 104
+            },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 186,
+                "h": 104
+            },
+            "sourceSize": {
+                "w": 186,
+                "h": 104
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        "splash_game_logo.png": {
+            "frame": {
+                "x": 845,
+                "y": 413,
+                "w": 505,
+                "h": 358
+            },
+            "rotated": false,
+            "trimmed": true,
+            "spriteSourceSize": {
+                "x": 1,
+                "y": 0,
+                "w": 505,
+                "h": 358
+            },
+            "sourceSize": {
+                "w": 506,
+                "h": 358
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        "splash_number_x.png": {
+            "frame": {
+                "x": 1360,
+                "y": 413,
+                "w": 180,
+                "h": 206
+            },
+            "rotated": false,
+            "trimmed": true,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 34,
+                "w": 180,
+                "h": 206
+            },
+            "sourceSize": {
+                "w": 180,
+                "h": 274
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        "splash_volatility.png": {
+            "frame": {
+                "x": 1550,
+                "y": 436,
+                "w": 302,
+                "h": 55
+            },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 302,
+                "h": 55
+            },
+            "sourceSize": {
+                "w": 302,
+                "h": 55
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        "splash_number_0.png": {
+            "frame": {
+                "x": 1862,
+                "y": 436,
+                "w": 154,
+                "h": 216
+            },
+            "rotated": false,
+            "trimmed": true,
+            "spriteSourceSize": {
+                "x": 12,
+                "y": 29,
+                "w": 154,
+                "h": 216
+            },
+            "sourceSize": {
+                "w": 180,
+                "h": 274
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        "splash_number_1.png": {
+            "frame": {
+                "x": 1550,
+                "y": 510,
+                "w": 110,
+                "h": 213
+            },
+            "rotated": false,
+            "trimmed": true,
+            "spriteSourceSize": {
+                "x": 34,
+                "y": 30,
+                "w": 110,
+                "h": 213
+            },
+            "sourceSize": {
+                "w": 180,
+                "h": 274
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        }
+    },
+    "meta": {
+        "app": "http://github.com/odrick/free-tex-packer-core",
+        "version": "0.3.5",
+        "image": "splash_screen.png",
+        "format": "RGBA8888",
+        "size": {
+            "w": 4096,
+            "h": 1024
+        },
+        "scale": 1
+    }
+}

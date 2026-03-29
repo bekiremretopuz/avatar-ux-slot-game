@@ -1,0 +1,111 @@
+{
+    "frames": {
+        "bg_landscape_basegame.jpg": {
+            "frame": {
+                "x": 3,
+                "y": 3,
+                "w": 1680,
+                "h": 945
+            },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 1680,
+                "h": 945
+            },
+            "sourceSize": {
+                "w": 1680,
+                "h": 945
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        "bg_landscape_bonusgame.jpg": {
+            "frame": {
+                "x": 1689,
+                "y": 3,
+                "w": 1680,
+                "h": 945
+            },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 1680,
+                "h": 945
+            },
+            "sourceSize": {
+                "w": 1680,
+                "h": 945
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        "bg_portrait_basegame.jpg": {
+            "frame": {
+                "x": 3,
+                "y": 954,
+                "w": 945,
+                "h": 1680
+            },
+            "rotated": true,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 945,
+                "h": 1680
+            },
+            "sourceSize": {
+                "w": 945,
+                "h": 1680
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        "bg_portrait_bonusgame.jpg": {
+            "frame": {
+                "x": 1689,
+                "y": 954,
+                "w": 945,
+                "h": 1680
+            },
+            "rotated": true,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 945,
+                "h": 1680
+            },
+            "sourceSize": {
+                "w": 945,
+                "h": 1680
+            },
+            "pivot": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        }
+    },
+    "meta": {
+        "app": "http://github.com/odrick/free-tex-packer-core",
+        "version": "0.3.5",
+        "image": "background_atlas.jpg",
+        "format": "RGB888",
+        "size": {
+            "w": 4096,
+            "h": 2048
+        },
+        "scale": 1
+    }
+}
