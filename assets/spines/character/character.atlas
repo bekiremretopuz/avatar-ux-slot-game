@@ -1,0 +1,74 @@
+character.png
+size: 469, 1268
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+pma: false
+character_body
+  bounds: 0, 942, 349, 326
+character_eyebrows_angry
+  bounds: 151, 31, 104, 42
+character_eyebrows_neutral
+  bounds: 0, 31, 112, 32
+character_eyebrows_question
+  bounds: 339, 31, 114, 50
+character_eyes_base
+  bounds: 36, 81, 106, 51
+character_eyes_pupil_left
+  bounds: 0, 0, 15, 18
+character_eyes_pupil_right
+  bounds: 15, 0, 17, 20
+character_eyes_pupils_hearts_left
+  bounds: 308, 0, 32, 31
+character_eyes_pupils_hearts_right
+  bounds: 340, 0, 36, 31
+character_eyes_upper_eyelid
+  bounds: 122, 0, 106, 29
+character_forearm_left
+  bounds: 147, 251, 115, 148
+character_glass
+  bounds: 142, 81, 45, 54
+character_hand_left
+  bounds: 75, 251, 72, 134
+character_hand_over
+  bounds: 0, 251, 75, 127
+character_head
+  bounds: 161, 661, 250, 281
+character_left_leg
+  bounds: 262, 251, 85, 153
+character_liquid
+  bounds: 112, 31, 39, 35
+character_lower_eyelid_left
+  bounds: 78, 0, 44, 24
+character_lower_eyelid_right
+  bounds: 46, 0, 32, 22
+character_mouth1
+  bounds: 255, 31, 84, 47
+character_mouth2
+  bounds: 0, 81, 36, 50
+character_mouth3
+  bounds: 347, 251, 90, 167
+character_mouth4
+  bounds: 228, 0, 80, 30
+character_mouth5
+  bounds: 282, 147, 92, 89
+character_mouth6
+  bounds: 0, 147, 99, 74
+character_necklace
+  bounds: 127, 418, 320, 243
+character_nose
+  bounds: 187, 81, 37, 54
+character_right_arm
+  bounds: 374, 147, 95, 104
+character_right_hand
+  bounds: 0, 661, 161, 255
+character_right_leg
+  bounds: 0, 418, 127, 169
+character_shoe_left
+  bounds: 224, 81, 98, 66
+character_shoe_right
+  bounds: 322, 81, 98, 66
+character_sunglasses
+  bounds: 99, 147, 183, 77
+character_sweat
+  bounds: 32, 0, 14, 20
