@@ -158,7 +158,7 @@ export class Machine {
     /** Calculates the local coordinates for a symbol within its reel */
     public getSymbolCoordinate(col: number, row: number) {
         return {
-            // Genişlik/2 ekleyerek anchor 0.5 olsa bile doğru yere oturmasını sağlıyoruz
+            // Add width/2 so the symbol is positioned correctly even with anchor 0.5
             x: REEL_CONFIGS.symbol.width * col + REEL_CONFIGS.symbol.width / 2,
             y:
                 REEL_CONFIGS.symbol.height * (row - 1) +

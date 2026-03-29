@@ -5,6 +5,8 @@ import gsap from "gsap";
  * Slot Symbol component with vertical blur capability and win animations
  */
 export class Symbols extends Sprite {
+    private static textureCache = new Map<string, Texture>();
+
     // Vertical blur filter applied dynamically during reel spinning
     private readonly _blurFilter = new BlurFilter({
         strengthY: 10,
@@ -22,13 +24,22 @@ export class Symbols extends Sprite {
         public readonly row: number,
         public readonly column: number,
     ) {
-        super(Texture.from(`${_type}.png`));
+        super(Symbols.getTexture(`${_type}.png`));
 
-        // Center the anchor point for proper scaling animations
         this.anchor.set(0.5);
 
-        this._baseTexture = Texture.from(`${_type}.png`);
+        this._baseTexture = Symbols.getTexture(`${_type}.png`);
         this._winTexture = this.getWinTexture(_type);
+    }
+
+    private static getTexture(name: string): Texture {
+        if (this.textureCache.has(name)) {
+            return this.textureCache.get(name)!;
+        }
+
+        const texture = Texture.from(name);
+        this.textureCache.set(name, texture);
+        return texture;
     }
 
     /** * Checks the asset cache and returns the win texture if available.

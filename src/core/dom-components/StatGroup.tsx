@@ -12,7 +12,7 @@ export const StatGroup: React.FC<StatGroupProps> = ({ label, value }) => (
         style={{
             ...statGroupStyle,
             display: "flex",
-            flexDirection: "row", // Etiket ve değer yan yana
+            flexDirection: "row",
             alignItems: "center",
             gap: "12px",
             minWidth: "fit-content",

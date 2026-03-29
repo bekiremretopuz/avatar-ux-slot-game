@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { game } from "../../main";
-import { GameEvent } from "..";
+import { GameEvent, GameEventPayloads } from "..";
 import { MACHINE_EVENTS } from "../../game/components/slot/Machine";
 import { spinBtnStyle } from "./uiStyles";
 
 interface SpinButtonProps {
-    onSpinRequest: () => void; // Parent'a spin başlama isteği gönderir
+    onSpinRequest: () => void; // Sends a spin start request to the parent
     balance: number;
     bet: number;
 }
@@ -18,8 +18,10 @@ export const SpinButton: React.FC<SpinButtonProps> = ({
     const [label, setLabel] = useState<"SPIN" | "STOP" | "WAIT">("SPIN");
 
     useEffect(() => {
-        const handler = (s: any) => {
-            if (s.status === MACHINE_EVENTS.COMPLETE) {
+        const handler = (
+            status: GameEventPayloads[typeof GameEvent.GAME_MACHINE_ANIMATION_STATUS],
+        ) => {
+            if (status.status === MACHINE_EVENTS.COMPLETE) {
                 setLabel("SPIN");
             }
         };

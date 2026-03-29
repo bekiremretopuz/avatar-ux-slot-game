@@ -6,7 +6,6 @@ import { MACHINE_EVENTS } from "../../game/components/slot/Machine";
  * Using 'as const' ensures that these are treated as literal strings for type safety.
  */
 export const GameEvent = {
-    //todo: it should be extendable for the game event from client. (global augmentation ?? idk)
     APP_START: "app:start",
     GAME_MACHINE_ANIMATION_STATUS: "game:machine-animation-status",
     PHYSICS_FIXED_UPDATE: "game:fixed-update",
@@ -66,11 +65,12 @@ export class EventEmitter {
      * Subscribe to an event once. The listener will be removed automatically after the first execution.
      */
     once<K extends GameEventValue>(event: K, listener: EventHandler<K>) {
-        const wrapper = (payload: any) => {
-            this.off(event, wrapper as any);
-            (listener as any)(payload);
-        };
-        this.on(event, wrapper as any);
+        const wrapper: EventHandler<K> = ((payload: GameEventPayloads[K]) => {
+            this.off(event, wrapper);
+            (listener as (payload: GameEventPayloads[K]) => void)(payload);
+        }) as EventHandler<K>;
+
+        this.on(event, wrapper);
     }
 
     /**
@@ -91,9 +91,15 @@ export class EventEmitter {
             ? []
             : [GameEventPayloads[K]]
     ) {
-        this.listeners[event]?.forEach((listener) =>
-            (listener as any)(payload[0]),
-        );
+        this.listeners[event]?.forEach((listener) => {
+            if (payload.length === 0) {
+                (listener as () => void)();
+            } else {
+                (listener as (payload: GameEventPayloads[K]) => void)(
+                    payload[0],
+                );
+            }
+        });
     }
 
     /**
@@ -103,7 +109,7 @@ export class EventEmitter {
      */
     wait<K extends GameEventValue>(event: K): Promise<GameEventPayloads[K]> {
         return new Promise((resolve) => {
-            this.once(event, ((payload: any) => {
+            this.once(event, ((payload: GameEventPayloads[K]) => {
                 resolve(payload);
             }) as EventHandler<K>);
         });

@@ -3,14 +3,14 @@ import { Machine, MACHINE_EVENTS } from "./Machine";
 import { GAME_CONFIG, REEL_CONFIGS } from "../../misc/const";
 import { game } from "../../../main";
 import { GameEvent } from "../../../core";
-import { SlotMath } from "../../misc/spinMath";
+import { SlotMath, SpinResult, WinningDetail } from "../../misc/spinMath";
 import { gsap } from "gsap";
 import { updateUIWin } from "../../../core/dom-components/GameUI";
 import { FloatingWinText } from "../FloatingText";
 
 export class SlotMechanism extends Container {
     private _machine: Machine;
-    private _currentResponse: any = null;
+    private _currentResponse: SpinResult | null = null;
     private _spinDelayCall: gsap.core.Animation | null = null;
     private _winText: FloatingWinText;
 
@@ -31,12 +31,13 @@ export class SlotMechanism extends Container {
 
         this._setupMask(reelContainer);
 
-        // --- Event Listeners ---
+        // --- Event listeners ---
         game.events.on(GameEvent.UI_START_MACHINE, this.startSpin);
         game.events.on(GameEvent.UI_STOP_MACHINE, this.handleQuickStop);
-        game.events.on(GameEvent.GAME_MACHINE_ANIMATION_STATUS, (data: any) => {
-            if (data.status === MACHINE_EVENTS.COMPLETE)
+        game.events.on(GameEvent.GAME_MACHINE_ANIMATION_STATUS, (data) => {
+            if (data.status === MACHINE_EVENTS.COMPLETE) {
                 this._handleSpinComplete();
+            }
         });
     }
 
@@ -45,15 +46,14 @@ export class SlotMechanism extends Container {
      * Handles state clearing and communicates with the game core for results.
      */
     public startSpin = (): void => {
-        // CRITICAL: Fast-forward any active win animation to secure pending balance updates
         this._winText.stopAndComplete();
         this._resetSymbolsVisuals();
 
-        // Calculate math on the client (mock server response)
         this._currentResponse = SlotMath.spin(GAME_CONFIG.FIXED_BET_AMOUNT);
+        console.log("Spin Response: ", this._currentResponse);
+
         this._machine.startSpin();
 
-        // Automatically stop the spin after 3.5 seconds
         this._spinDelayCall = gsap.delayedCall(3.5, this.executeStop);
     };
 
@@ -76,7 +76,7 @@ export class SlotMechanism extends Container {
      * and triggering the floating text.
      */
     private _startWinCelebration(
-        winningDetails: any[],
+        winningDetails: WinningDetail[],
         totalWin: number,
     ): void {
         // 1. Dim all symbols to create visual focus
@@ -86,7 +86,7 @@ export class SlotMechanism extends Container {
 
         // 2. Brighten winning symbols and play their idle loop animations
         winningDetails.forEach((detail) => {
-            detail.winningCoords.forEach((pos: any) => {
+            detail.winningCoords.forEach((pos) => {
                 const symbol = this._machine.reels[pos.col].symbols.find(
                     (s) => s.row === pos.row,
                 );

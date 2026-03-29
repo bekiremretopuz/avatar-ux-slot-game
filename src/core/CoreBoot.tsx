@@ -56,7 +56,6 @@ export class CoreBoot {
             <GameUI
                 fixedBetAmount={GAME_CONFIG.FIXED_BET_AMOUNT}
                 balance={GAME_CONFIG.INITIAL_CREDITS}
-                onSpin={(_bet) => {}}
             />,
         );
 

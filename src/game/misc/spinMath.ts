@@ -1,5 +1,7 @@
 import { REEL_CONFIGS } from "./const";
 
+export type WinLineLength = 3 | 4 | 5;
+
 /**
  * Slot machine symbol identifiers.
  */
@@ -24,12 +26,37 @@ export type SymbolId =
     | "10"
     | "9";
 
-// --- Static Configuration (Pre-calculated for performance) ---
+export interface WinCoordinate {
+    col: number;
+    row: number;
+}
 
+export interface WinningDetail {
+    symbolId: SymbolId;
+    count: number;
+    ways: number;
+    amount: number;
+    winningCoords: WinCoordinate[];
+}
+
+export interface SpinResult {
+    grid: SymbolId[][];
+    totalWin: number;
+    winningDetails: WinningDetail[];
+}
+
+type PayTable = Record<SymbolId, Record<WinLineLength, number>>;
+
+// --- Configuration ---
+const IS_WILD_FEATURE_ACTIVE = true; // get more wins with the wild feature, but it can be turned off for a more traditional experience
+// The chosen symbol acting as the Wild.
+const WILD_SYMBOL: SymbolId = "H2";
+
+// Higher weight means the symbol lands more often.
 const WEIGHTS: Record<SymbolId, number> = {
     BONUS: 2,
     H1: 5,
-    H2: 8,
+    H2: 90,
     H3: 10,
     H4: 12,
     H5: 15,
@@ -40,15 +67,16 @@ const WEIGHTS: Record<SymbolId, number> = {
     M4: 35,
     M5: 40,
     M6: 45,
-    A: 150,
-    K: 150,
-    Q: 150,
-    J: 150,
-    10: 150,
-    9: 150,
+    A: 200,
+    K: 210,
+    Q: 220,
+    J: 230,
+    10: 240,
+    9: 250,
 };
 
-const PAY: any = {
+// Payout multipliers based on matching 3, 4, or 5 symbols on a line.
+const PAY: PayTable = {
     BONUS: { 3: 200, 4: 1000, 5: 5000 },
     H1: { 3: 100, 4: 250, 5: 1000 },
     H2: { 3: 80, 4: 200, 5: 800 },
@@ -75,11 +103,11 @@ const TOTAL_WEIGHT = Object.values(WEIGHTS).reduce((a, b) => a + b, 0);
 
 export class SlotMath {
     /**
-     * Entry point for a spin. Generates grid and calculates all wins.
+     * Triggers a new spin, generates the random grid, and checks for wins.
      */
-    public static spin(bet: number = 1) {
+    public static spin(bet: number = 1): SpinResult {
         const { col, row } = REEL_CONFIGS.machine.dimension;
-        // Generate grid using weighted RNG
+
         const grid = Array.from({ length: col }, () =>
             Array.from({ length: row }, () => this.getSymbol()),
         );
@@ -89,20 +117,38 @@ export class SlotMath {
     }
 
     /**
-     * Logic to calculate all winning "Ways" on the grid.
+     * Scans the grid to find all winning ways (Left-to-Right).
      */
-    private static calculateWins(grid: SymbolId[][], bet: number) {
+    private static calculateWins(
+        grid: SymbolId[][],
+        bet: number,
+    ): { totalWin: number; details: WinningDetail[] } {
         const colCount = grid.length;
-        const details = [...new Set(grid[0])]
+
+        // all possible symbols in the game (excluding the Wild) one by one.
+        const allPossibleSymbols = SYMBOL_KEYS.filter((s) => s !== WILD_SYMBOL);
+
+        const details = allPossibleSymbols
             .map((symbol) => {
                 const multipliers: number[] = [];
-                const winCoords: { col: number; row: number }[] = [];
+                const winCoords: WinCoordinate[] = [];
 
+                // Look for matches across consecutive reels.
                 for (let c = 0; c < colCount; c++) {
-                    const matchedRows = grid[c]
-                        .map((s, r) => (s === symbol ? r : -1))
-                        .filter((r) => r !== -1);
+                    const matchedRows: number[] = [];
 
+                    grid[c].forEach((s, r) => {
+                        // A cell matches if it's the exact symbol or a substitute Wild.
+                        const isMatch =
+                            s === symbol ||
+                            (IS_WILD_FEATURE_ACTIVE && s === WILD_SYMBOL);
+
+                        if (isMatch) {
+                            matchedRows.push(r);
+                        }
+                    });
+
+                    // Break the chain if no matches are found in this reel.
                     if (!matchedRows.length) break;
 
                     multipliers.push(matchedRows.length);
@@ -111,12 +157,15 @@ export class SlotMath {
                     );
                 }
 
+                // We need at least 3 matching reels to trigger a payout.
                 if (multipliers.length < 3) return null;
 
+                // Multiply ways across reels (e.g., 2 symbols on reel 1 * 3 symbols on reel 2 = 6 ways).
                 const ways = multipliers.reduce((a, b) => a * b, 1);
-                // Calculate final integer amount
+                const length = multipliers.length as WinLineLength;
+
                 const amount = Math.floor(
-                    (PAY[symbol][multipliers.length] || 0) * ways * bet,
+                    (PAY[symbol][length] || 0) * ways * bet,
                 );
 
                 return amount > 0
@@ -136,7 +185,7 @@ export class SlotMath {
     }
 
     /**
-     * Weighted random selection.
+     * Grabs a random symbol based on defined probabilities (weights).
      */
     private static getSymbol(): SymbolId {
         let rand = Math.random() * TOTAL_WEIGHT;

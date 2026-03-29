@@ -14,16 +14,11 @@ export let updateUIWin: (val: number) => void = () => {};
 export let updateUIBet: (val: number) => void = () => {};
 
 interface GameUIProps {
-    onSpin: (currentBet: number) => void;
     balance: number;
     fixedBetAmount: number;
 }
 
-export const GameUI: React.FC<GameUIProps> = ({
-    onSpin,
-    fixedBetAmount,
-    balance,
-}) => {
+export const GameUI: React.FC<GameUIProps> = ({ fixedBetAmount, balance }) => {
     // Stat States
     const [currentBalance, setCurrentBalance] = useState(balance);
     const [currentWin, setCurrentWin] = useState(0);
@@ -60,7 +55,6 @@ export const GameUI: React.FC<GameUIProps> = ({
             // Functional update: 'prev' always guarantees we modify the most recent React state value
             setCurrentBalance((prev) => {
                 const finalBalance = prev + winAmount;
-                console.log("UI Sync: New Balance after win:", finalBalance);
                 return finalBalance;
             });
         };
@@ -88,9 +82,6 @@ export const GameUI: React.FC<GameUIProps> = ({
         game.events.on(GameEvent.GAME_SHOW_MAIN_SCREEN, showUI);
         window.addEventListener("resize", updateLayout);
 
-        // Directly show the UI if the game scene is already fully loaded
-        if ((window as any).isGameReady) setVisible(true);
-
         updateLayout();
 
         return () => {
@@ -99,14 +90,12 @@ export const GameUI: React.FC<GameUIProps> = ({
         };
     }, [updateLayout, showUI]);
 
-    // 4. Spin Initiation Trigger (Triggered when child SpinButton handles click)
+    // 4. Spin initiation handler triggered by the child spin button.
     const handleSpinInitiated = () => {
         // Reset the win field on every new spin
         setCurrentWin(0);
         // Instantly deduct the bet amount from visual balance
         setCurrentBalance((prev) => prev - bet);
-        // Execute the actual game scene spin logic
-        onSpin(bet);
     };
 
     if (!visible) return null;
