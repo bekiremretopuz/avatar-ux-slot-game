@@ -2,17 +2,14 @@ import React, { useState, useEffect } from "react";
 import { game } from "../../main";
 import { GameEvent, GameEventPayloads } from "..";
 import { MACHINE_EVENTS } from "../../game/components/slot/Machine";
-import { spinBtnStyle } from "./uiStyles";
+import "./GameUI.css";
 
 interface SpinButtonProps {
     balance: number;
     bet: number;
 }
 
-export const SpinButton: React.FC<SpinButtonProps> = ({
-    balance,
-    bet,
-}) => {
+export const SpinButton: React.FC<SpinButtonProps> = ({ balance, bet }) => {
     const [label, setLabel] = useState<"SPIN" | "STOP" | "WAIT">("SPIN");
 
     useEffect(() => {
@@ -47,15 +44,9 @@ export const SpinButton: React.FC<SpinButtonProps> = ({
 
     return (
         <button
+            className="spin-button"
             onClick={handleClick}
             disabled={isDisabled}
-            style={{
-                ...spinBtnStyle,
-                opacity: isDisabled ? 0.6 : 1,
-                filter: isDisabled ? "grayscale(0.5)" : "none",
-                cursor: isDisabled ? "not-allowed" : "pointer",
-                pointerEvents: "auto",
-            }}
         >
             {label}
         </button>

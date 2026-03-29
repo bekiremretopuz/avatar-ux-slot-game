@@ -1,3 +1,23 @@
+import React from "react";
+import { GAME_HEIGHT, GAME_WIDTH } from "../../core/managers/DisplayManager";
+
+export const getSafeAreaStyle = (transform: {
+    scale: number;
+    left: string;
+    top: string;
+}): React.CSSProperties => ({
+    position: "absolute",
+    width: GAME_WIDTH,
+    height: GAME_HEIGHT,
+    left: 0,
+    top: 0,
+    transform: `translate(${transform.left}, ${transform.top}) translate(-50%, -50%) scale(${transform.scale})`,
+    transformOrigin: "center center",
+    pointerEvents: "none",
+    boxSizing: "border-box",
+    overflow: "hidden",
+});
+
 // Default fallback values - Updated dynamically from game-config.json during Splash screen
 export const GAME_CONFIG = {
     INITIAL_CREDITS: 10000,
@@ -146,7 +166,6 @@ export const REEL_CONFIGS = {
             ],
         ],
     },
-
     // Spin physics and animation timing constants
     reel: {
         maxFullRotationProgress: 1, // Normalized progress for a complete spin cycle

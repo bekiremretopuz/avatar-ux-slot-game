@@ -1,4 +1,4 @@
-import { Application, Container, Ticker } from "pixi.js";
+import { Application, Container } from "pixi.js";
 import {
     AssetLoader,
     DisplayManager,
@@ -121,10 +121,5 @@ export class CoreBoot {
             },
             ["game"],
         );
-    }
-
-    // Expose Pixi ticker for game loop updates
-    public get ticker(): Ticker {
-        return this.app.ticker;
     }
 }

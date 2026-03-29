@@ -5,7 +5,8 @@ import { GameEvent, GameEventPayloads } from "..";
 
 import { StatGroup } from "./StatGroup";
 import { SpinButton } from "./SpinButton";
-import { footerBarStyle, getSafeAreaStyle } from "./uiStyles";
+import "./GameUI.css";
+import { getSafeAreaStyle } from "../../game/misc/const";
 
 interface GameUIProps {
     balance: number;
@@ -86,51 +87,16 @@ export const GameUI: React.FC<GameUIProps> = ({ fixedBetAmount, balance }) => {
     if (!visible) return null;
 
     return (
-        <div style={getSafeAreaStyle(transform)}>
-            {/* Main Relative Wrapper */}
-            <div
-                style={{ position: "relative", width: "100%", height: "100%" }}
-            >
-                {/* FOOTER OVERLAY BAR */}
-                <div
-                    style={{
-                        ...footerBarStyle,
-                        display: "flex",
-                        alignItems: "center",
-                        width: "100%",
-                        padding: "0 50px",
-                        boxSizing: "border-box",
-                        position: "absolute",
-                        bottom: 0,
-                        zIndex: 1,
-                    }}
-                >
-                    {/* STATS GROUP */}
-                    <div
-                        style={{
-                            display: "flex",
-                            flex: 1,
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                        }}
-                    >
+        <div className="game-ui-safe-area" style={getSafeAreaStyle(transform)}>
+            <div className="game-ui-inner">
+                <div className="game-ui-footer">
+                    <div className="game-ui-stats">
                         <StatGroup label="BALANCE" value={currentBalance} />
                         <StatGroup label="WIN" value={currentWin} />
                         <StatGroup label="BET" value={bet} />
                     </div>
                 </div>
-
-                {/* SPIN BUTTON CONTAINER */}
-                <div
-                    style={{
-                        position: "absolute",
-                        right: "26px",
-                        bottom: "139px",
-                        zIndex: 10,
-                        filter: "drop-shadow(0px 4px 10px rgba(0,0,0,0.5))",
-                        pointerEvents: "auto",
-                    }}
-                >
+                <div className="game-ui-spin-button-wrapper">
                     <SpinButton balance={currentBalance} bet={bet} />
                 </div>
             </div>
