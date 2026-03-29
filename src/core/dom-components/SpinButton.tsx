@@ -5,13 +5,11 @@ import { MACHINE_EVENTS } from "../../game/components/slot/Machine";
 import { spinBtnStyle } from "./uiStyles";
 
 interface SpinButtonProps {
-    onSpinRequest: () => void; // Sends a spin start request to the parent
     balance: number;
     bet: number;
 }
 
 export const SpinButton: React.FC<SpinButtonProps> = ({
-    onSpinRequest,
     balance,
     bet,
 }) => {
@@ -39,7 +37,6 @@ export const SpinButton: React.FC<SpinButtonProps> = ({
             game.events.emit(GameEvent.UI_START_MACHINE, {
                 betAmount: bet,
             });
-            onSpinRequest();
         } else if (label === "STOP") {
             setLabel("WAIT");
             game.events.emit(GameEvent.UI_STOP_MACHINE);

@@ -1,17 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { GAME_HEIGHT, GAME_WIDTH } from "../managers/DisplayManager";
 import { game } from "../../main";
-import { GameEvent } from "..";
+import { GameEvent, GameEventPayloads } from "..";
 
 import { StatGroup } from "./StatGroup";
 import { SpinButton } from "./SpinButton";
 import { footerBarStyle, getSafeAreaStyle } from "./uiStyles";
-
-// --- EXTERNAL ACCESS ---
-// These variables can be imported and called directly from TS files like SlotMechanism or Machine.
-export let updateUIBalance: (val: number) => void = () => {};
-export let updateUIWin: (val: number) => void = () => {};
-export let updateUIBet: (val: number) => void = () => {};
 
 interface GameUIProps {
     balance: number;
@@ -41,29 +35,28 @@ export const GameUI: React.FC<GameUIProps> = ({ fixedBetAmount, balance }) => {
         setBet(fixedBetAmount);
     }, [fixedBetAmount]);
 
-    // 2. Bind Functions for External Access
+    // 2. Bind game event listeners for UI updates
     useEffect(() => {
-        // Direct balance override (e.g., deducting bet at the beginning of a spin)
-        updateUIBalance = (newTotal: number) => {
-            setCurrentBalance(newTotal);
+        const handleSpinStart = (
+            payload: GameEventPayloads[typeof GameEvent.UI_START_MACHINE],
+        ) => {
+            setCurrentWin(0);
+            setCurrentBalance((prev) => prev - payload.betAmount);
         };
 
-        // Handles win updates: updates both the WIN box and adds to the current balance
-        updateUIWin = (winAmount: number) => {
-            setCurrentWin(winAmount);
-
-            // Functional update: 'prev' always guarantees we modify the most recent React state value
-            setCurrentBalance((prev) => {
-                const finalBalance = prev + winAmount;
-                return finalBalance;
-            });
+        const handlePlayerWin = (
+            payload: GameEventPayloads[typeof GameEvent.GAME_PLAYER_WIN],
+        ) => {
+            setCurrentWin(payload.amount);
+            setCurrentBalance((prev) => prev + payload.amount);
         };
 
-        updateUIBet = (val: number) => setBet(val);
+        game.events.on(GameEvent.UI_START_MACHINE, handleSpinStart);
+        game.events.on(GameEvent.GAME_PLAYER_WIN, handlePlayerWin);
 
         return () => {
-            // Cleanup references on unmount to prevent memory leaks
-            updateUIBalance = updateUIWin = updateUIBet = () => {};
+            game.events.off(GameEvent.UI_START_MACHINE, handleSpinStart);
+            game.events.off(GameEvent.GAME_PLAYER_WIN, handlePlayerWin);
         };
     }, []);
 
@@ -89,14 +82,6 @@ export const GameUI: React.FC<GameUIProps> = ({ fixedBetAmount, balance }) => {
             game.events.off(GameEvent.GAME_SHOW_MAIN_SCREEN, showUI);
         };
     }, [updateLayout, showUI]);
-
-    // 4. Spin initiation handler triggered by the child spin button.
-    const handleSpinInitiated = () => {
-        // Reset the win field on every new spin
-        setCurrentWin(0);
-        // Instantly deduct the bet amount from visual balance
-        setCurrentBalance((prev) => prev - bet);
-    };
 
     if (!visible) return null;
 
@@ -146,11 +131,7 @@ export const GameUI: React.FC<GameUIProps> = ({ fixedBetAmount, balance }) => {
                         pointerEvents: "auto",
                     }}
                 >
-                    <SpinButton
-                        onSpinRequest={handleSpinInitiated}
-                        balance={currentBalance}
-                        bet={bet}
-                    />
+                    <SpinButton balance={currentBalance} bet={bet} />
                 </div>
             </div>
         </div>

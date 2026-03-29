@@ -12,6 +12,7 @@ export const GameEvent = {
     GAME_SHOW_MAIN_SCREEN: "game:show-main-screen",
     UI_START_MACHINE: "ui:request-start-machine",
     UI_STOP_MACHINE: "ui:request-stop-machine",
+    GAME_PLAYER_WIN: "game:player-win",
 } as const;
 
 /** * Type representing the actual string values of GameEvent.
@@ -33,6 +34,7 @@ export interface GameEventPayloads {
     [GameEvent.GAME_SHOW_MAIN_SCREEN]: void;
     [GameEvent.UI_START_MACHINE]: { betAmount: number };
     [GameEvent.UI_STOP_MACHINE]: void;
+    [GameEvent.GAME_PLAYER_WIN]: { amount: number };
 }
 
 /**

@@ -5,7 +5,6 @@ import { game } from "../../../main";
 import { GameEvent } from "../../../core";
 import { SlotMath, SpinResult, WinningDetail } from "../../misc/spinMath";
 import { gsap } from "gsap";
-import { updateUIWin } from "../../../core/dom-components/GameUI";
 import { FloatingWinText } from "../FloatingText";
 
 export class SlotMechanism extends Container {
@@ -98,8 +97,9 @@ export class SlotMechanism extends Container {
         // 3. Trigger the floating text animation
         if (totalWin > 0) {
             this._winText.showWin(totalWin, () => {
-                // updateUIWin updates React states: adds to both 'win' and 'currentBalance'
-                updateUIWin(totalWin);
+                game.events.emit(GameEvent.GAME_PLAYER_WIN, {
+                    amount: totalWin,
+                });
             });
         }
     }
