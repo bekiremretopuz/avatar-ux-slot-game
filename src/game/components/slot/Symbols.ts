@@ -14,10 +14,10 @@ export class Symbols extends Sprite {
         quality: 2,
     });
 
-    private _winTween: gsap.core.Timeline | null = null;
+    private winTween: gsap.core.Timeline | null = null;
 
-    private _baseTexture: Texture;
-    private _winTexture: Texture;
+    private baseTexture: Texture;
+    private winTexture: Texture;
 
     constructor(
         private _type: string,
@@ -28,8 +28,8 @@ export class Symbols extends Sprite {
 
         this.anchor.set(0.5);
 
-        this._baseTexture = Symbols.getTexture(`${_type}.png`);
-        this._winTexture = this.getWinTexture(_type);
+        this.baseTexture = Symbols.getTexture(`${_type}.png`);
+        this.winTexture = this.getWinTexture(_type);
     }
 
     private static getTexture(name: string): Texture {
@@ -73,10 +73,10 @@ export class Symbols extends Sprite {
     public set type(value: string) {
         this._type = value;
 
-        this._baseTexture = Texture.from(`${value}.png`);
-        this._winTexture = this.getWinTexture(value);
+        this.baseTexture = Texture.from(`${value}.png`);
+        this.winTexture = this.getWinTexture(value);
 
-        this.texture = this._baseTexture;
+        this.texture = this.baseTexture;
     }
 
     /** * Dims the symbol to emphasize winning paylines
@@ -93,27 +93,27 @@ export class Symbols extends Sprite {
         this.stopWinAnimation();
 
         // Check if a dedicated win asset actually exists to prevent useless texture assignments
-        const hasSpecial = this._winTexture !== this._baseTexture;
+        const hasSpecial = this.winTexture !== this.baseTexture;
 
-        this._winTween = gsap.timeline({ repeat: -1 });
+        this.winTween = gsap.timeline({ repeat: -1 });
 
-        this._winTween.to(this.scale, {
+        this.winTween.to(this.scale, {
             x: 1.015,
             y: 1.015,
             duration: 0.6,
             ease: "sine.inOut",
             onStart: () => {
-                if (hasSpecial) this.texture = this._winTexture;
+                if (hasSpecial) this.texture = this.winTexture;
             },
         });
 
-        this._winTween.to(this.scale, {
+        this.winTween.to(this.scale, {
             x: 1,
             y: 1,
             duration: 0.6,
             ease: "sine.inOut",
             onStart: () => {
-                if (hasSpecial) this.texture = this._baseTexture;
+                if (hasSpecial) this.texture = this.baseTexture;
             },
         });
     }
@@ -122,13 +122,13 @@ export class Symbols extends Sprite {
      * and resetting the symbol back to its default static visual state.
      */
     public stopWinAnimation() {
-        if (this._winTween) {
-            this._winTween.kill();
-            this._winTween = null;
+        if (this.winTween) {
+            this.winTween.kill();
+            this.winTween = null;
         }
 
         this.scale.set(1);
         this.alpha = 1;
-        this.texture = this._baseTexture;
+        this.texture = this.baseTexture;
     }
 }

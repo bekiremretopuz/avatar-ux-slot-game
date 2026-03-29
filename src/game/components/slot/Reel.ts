@@ -9,8 +9,8 @@ import { GameEvent } from "../../../core";
 export class Reel extends Container {
     private _symbols: Symbols[] = [];
     private _progress = 0;
-    private _speedFactor = 1;
-    private _acc = 0.01;
+    private speedFactor = 1;
+    private acc = 0.01;
     private _startTime = 0;
     private speed = 0.02;
     private stop = false;
@@ -75,8 +75,8 @@ export class Reel extends Container {
         } else {
             this.progress += this.speed * this.calcDeltaRatio();
             this.speed = Math.min(
-                this.speed + this._acc,
-                REEL_CONFIGS.reel.maxSpeed * this._speedFactor,
+                this.speed + this.acc,
+                REEL_CONFIGS.reel.maxSpeed * this.speedFactor,
             );
         }
     };
@@ -95,7 +95,7 @@ export class Reel extends Container {
                     prog /
                         ((REEL_CONFIGS.reel.defaultDecelarationFactor * 1.2) /
                             2),
-                    this._acc * 2,
+                    this.acc * 2,
                 ) * this.calcDeltaRatio();
 
             prog -= ease;
@@ -119,7 +119,7 @@ export class Reel extends Container {
     private preStop() {
         this.stop = true;
         // Mark the next reel to stop after a short delay to create a staggered stopping effect
-        gsap.delayedCall(1.1 - this._speedFactor, () =>
+        gsap.delayedCall(1.1 - this.speedFactor, () =>
             this.machine.markNextToStop(this.column),
         );
         this.machine.reelStopping(this.column);
@@ -171,7 +171,7 @@ export class Reel extends Container {
     }
 
     hasFullSpeed() {
-        return !this.machine.shouldStop(this.column) && this._speedFactor >= 1;
+        return !this.machine.shouldStop(this.column) && this.speedFactor >= 1;
     }
 
     get symbols() {

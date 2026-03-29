@@ -8,83 +8,119 @@ import { gsap } from "gsap";
 import { FloatingWinText } from "../FloatingText";
 
 export class SlotMechanism extends Container {
-    private _machine!: Machine;
-    private _currentResponse: SpinResult | null = null;
-    private _spinDelayCall: gsap.core.Animation | null = null;
-    private _winText!: FloatingWinText;
+    private machine!: Machine;
+    private currentResponse: SpinResult | null = null;
+    private spinDelayCall: gsap.core.Animation | null = null;
+    private winText!: FloatingWinText;
 
     public postConstruct(): void {
-        this._setupFrame();
-        this._machine = new Machine();
+        this.setupFrame();
+        this.machine = new Machine();
 
         // Create a wrapper for the reels to apply masking properly
         const reelContainer = new Container();
-        reelContainer.addChild(...this._machine.reels);
+        reelContainer.addChild(...this.machine.reels);
         this.addChild(reelContainer);
 
         // Initialize the floating text that shows win values
-        this._winText = new FloatingWinText();
-        this._winText.position.set(864, 462);
-        this.addChild(this._winText);
+        this.winText = new FloatingWinText();
+        this.winText.position.set(864, 462);
+        this.addChild(this.winText);
 
-        this._setupMask(reelContainer);
+        this.setupMask(reelContainer);
+        this.setupEventListeners();
+    }
 
-        // --- Event listeners ---
+    private setupEventListeners(): void {
         game.events.on(GameEvent.UI_START_MACHINE, this.startSpin);
         game.events.on(GameEvent.UI_STOP_MACHINE, this.handleQuickStop);
-        game.events.on(GameEvent.GAME_MACHINE_ANIMATION_STATUS, (data) => {
-            if (data.status === MACHINE_EVENTS.COMPLETE) {
-                this._handleSpinComplete();
-            }
-        });
+        game.events.on(
+            GameEvent.GAME_MACHINE_ANIMATION_STATUS,
+            this.onAnimationStatusChange,
+        );
     }
+
     /**
      * Triggered when the player clicks the Spin button.
-     * Handles state clearing and communicates with the game core for results.
      */
     public startSpin = (): void => {
-        this._winText.stopAndComplete();
-        this._resetSymbolsVisuals();
+        this.winText.stopAndComplete();
+        this.resetSymbolsVisuals();
 
-        this._currentResponse = SlotMath.spin(GAME_CONFIG.FIXED_BET_AMOUNT);
-        console.log("Spin Response: ", this._currentResponse);
+        // Tip: In the future, consider injecting SlotMath or moving this to a Controller/Command
+        this.currentResponse = SlotMath.spin(GAME_CONFIG.FIXED_BET_AMOUNT);
+        console.log("Spin Response: ", this.currentResponse);
 
-        this._machine.startSpin();
+        this.machine.startSpin();
 
-        this._spinDelayCall = gsap.delayedCall(0.6, this.executeStop);
+        // Kept at 0.6 as per your functional code, updated the comment below
+        this.spinDelayCall = gsap.delayedCall(0.6, this.executeStop);
+    };
+
+    private onAnimationStatusChange = (data: { status: string }): void => {
+        if (data.status === MACHINE_EVENTS.COMPLETE) {
+            this._handleSpinComplete();
+        }
     };
 
     /**
      * Triggered when the machine finishes its stop animation sequence.
      */
     private _handleSpinComplete(): void {
-        if (!this._currentResponse) return;
-        const { totalWin, winningDetails } = this._currentResponse;
+        if (!this.currentResponse) return;
 
-        // If there are wins, kick off the win display sequence
-        if (totalWin > 0 && winningDetails) {
-            this._startWinCelebration(winningDetails, totalWin);
+        // If an action (win/freespin/bonus) handles the response, we just clean up
+        this.resolveNextAction();
+        this.currentResponse = null;
+    }
+
+    /**
+     * Resolves the next outcome in priority order: win first, then free spins, then bonus.
+     */
+    private resolveNextAction(): boolean {
+        return (
+            this.resolveWinAction() ||
+            this.resolveFreeSpinAction() ||
+            this.resolveBonusAction()
+        );
+    }
+
+    private resolveWinAction(): boolean {
+        const response = this.currentResponse;
+        if (!response || response.totalWin <= 0 || !response.winningDetails) {
+            return false;
         }
-        this._currentResponse = null;
+
+        this.startWinCelebration(response.winningDetails, response.totalWin);
+        return true;
+    }
+
+    // Placeholder for future free spin handling.
+    private resolveFreeSpinAction(): boolean {
+        return false;
+    }
+    // Placeholder for future bonus handling.
+    private resolveBonusAction(): boolean {
+        return false;
     }
 
     /**
      * Handles dimming non-winning symbols, highlighting the winning ones,
      * and triggering the floating text.
      */
-    private _startWinCelebration(
+    private startWinCelebration(
         winningDetails: WinningDetail[],
         totalWin: number,
     ): void {
         // 1. Dim all symbols to create visual focus
-        this._machine.reels.forEach((reel) =>
-            reel.symbols.forEach((s) => s.setDim(true)),
+        this.machine.reels.forEach((reel) =>
+            reel.symbols.forEach((symbol) => symbol.setDim(true)),
         );
 
         // 2. Brighten winning symbols and play their idle loop animations
         winningDetails.forEach((detail) => {
             detail.winningCoords.forEach((pos) => {
-                const symbol = this._machine.reels[pos.col].symbols.find(
+                const symbol = this.machine.reels[pos.col].symbols.find(
                     (s) => s.row === pos.row,
                 );
                 if (symbol) {
@@ -94,23 +130,19 @@ export class SlotMechanism extends Container {
             });
         });
 
-        // 3. Trigger the floating text animation
-        if (totalWin > 0) {
-            this._winText.showWin(totalWin, () => {
-                game.events.emit(GameEvent.UI_WIN_UPDATE, {
-                    amount: totalWin,
-                });
-            });
-            // 4. Character animation on win case
-            game.events.emit(GameEvent.GAME_WIN_UPDATE);
-        }
+        // 3. Trigger the floating text animation & character animation
+        this.winText.showWin(totalWin, () => {
+            game.events.emit(GameEvent.UI_WIN_UPDATE, { amount: totalWin });
+        });
+
+        game.events.emit(GameEvent.GAME_WIN_UPDATE);
     }
 
     /**
      * Clears all visual states, stops GSAP tweens, and scales symbols back to default.
      */
-    private _resetSymbolsVisuals(): void {
-        this._machine.reels.forEach((reel) => {
+    private resetSymbolsVisuals(): void {
+        this.machine.reels.forEach((reel) => {
             reel.symbols.forEach((symbol) => {
                 symbol.setDim(false);
                 symbol.stopWinAnimation();
@@ -121,36 +153,36 @@ export class SlotMechanism extends Container {
     }
 
     /**
-     * Triggered when the user clicks spin again before the scheduled stop.
+     * Triggered when the user clicks spin again before the scheduled stop (Quick Stop).
      */
-    private handleQuickStop = (): void => {
-        this._clearDelayCall();
-        if (!this._currentResponse) return;
-        this._machine.stopSpin(this._currentResponse.grid, true);
+    public handleQuickStop = (): void => {
+        this.clearDelayCall();
+        if (!this.currentResponse) return;
+        this.machine.stopSpin(this.currentResponse.grid, true);
     };
 
     /**
-     * Natural stop routine called after the 3.5s delay concludes.
+     * Natural stop routine called after the GSAP delay concludes.
      */
     private executeStop = (): void => {
-        if (!this._currentResponse) return;
-        this._machine.stopSpin(this._currentResponse.grid);
+        if (!this.currentResponse) return;
+        this.machine.stopSpin(this.currentResponse.grid);
     };
 
     /**
      * Clears the scheduled GSAP delayed call to prevent out-of-sync stops.
      */
-    private _clearDelayCall(): void {
-        if (this._spinDelayCall) {
-            this._spinDelayCall.kill();
-            this._spinDelayCall = null;
+    private clearDelayCall(): void {
+        if (this.spinDelayCall) {
+            this.spinDelayCall.kill();
+            this.spinDelayCall = null;
         }
     }
 
     /**
      * Renders the static outer frame bounding the slot machine grid.
      */
-    private _setupFrame(): void {
+    private setupFrame(): void {
         const panelFrame = new Sprite(Texture.from("slotFrame"));
         panelFrame.scale.set(1.095, 1.2);
         panelFrame.position.set(340, 124);
@@ -160,7 +192,7 @@ export class SlotMechanism extends Container {
     /**
      * Restricts the visible bounds of symbols so spinning doesn't leak out of the frame.
      */
-    private _setupMask(container: Container): void {
+    private setupMask(container: Container): void {
         const spinMask = new Graphics()
             .roundRect(
                 360,
@@ -170,17 +202,23 @@ export class SlotMechanism extends Container {
                 10,
             )
             .fill({ color: 0xffffff, alpha: 0.25 });
+
         container.mask = spinMask;
         this.addChild(spinMask);
     }
 
     /**
-     * Lifecyle destroy method ensuring no active event listeners or timers produce memory leaks.
+     * Lifecycle destroy method ensuring no active event listeners or timers produce memory leaks.
      */
     public destroy(options?: any): void {
         game.events.off(GameEvent.UI_START_MACHINE, this.startSpin);
         game.events.off(GameEvent.UI_STOP_MACHINE, this.handleQuickStop);
-        this._clearDelayCall();
+        game.events.off(
+            GameEvent.GAME_MACHINE_ANIMATION_STATUS,
+            this.onAnimationStatusChange,
+        );
+
+        this.clearDelayCall();
         super.destroy(options);
     }
 }

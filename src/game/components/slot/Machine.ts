@@ -23,12 +23,12 @@ export enum MACHINE_EVENTS {
 export class Machine {
     private _symbols: Symbols[] = [];
     private _reels: Reel[] = [];
-    private _reelPositions: number[] = [];
-    private _stopFlags: boolean[] = [];
-    private _reelStates: REEL_STATES[] = [];
-    private _finalSymbols?: string[][];
+    private reelPositions: number[] = [];
+    private stopFlags: boolean[] = [];
+    private reelStates: REEL_STATES[] = [];
+    private finalSymbols?: string[][];
     private _spinTimeFactor = 1;
-    private _minSpin = 0.1; // Minimum allowed duration before a reel can land
+    private minSpin = 0.1; // Minimum allowed duration before a reel can land
     private pseudo: string[][] = [];
 
     constructor() {
@@ -51,16 +51,16 @@ export class Machine {
             return reel;
         });
 
-        this._stopFlags = Array(cols).fill(false);
-        this._reelPositions = Array(cols).fill(0);
-        this._reelStates = Array(cols).fill(REEL_STATES.IDLE);
+        this.stopFlags = Array(cols).fill(false);
+        this.reelPositions = Array(cols).fill(0);
+        this.reelStates = Array(cols).fill(REEL_STATES.IDLE);
     }
 
     /** Resets flags and triggers the spin animation for all reels */
     public startSpin(): void {
-        this._stopFlags.fill(false);
-        this._finalSymbols = undefined;
-        this._reelStates.fill(REEL_STATES.SPINNING);
+        this.stopFlags.fill(false);
+        this.finalSymbols = undefined;
+        this.reelStates.fill(REEL_STATES.SPINNING);
         this._reels.forEach((r) => r.startSpin());
     }
 
@@ -69,54 +69,54 @@ export class Machine {
      * @param isQuickStop If true, triggers a rapid staggered stop across all columns.
      */
     public stopSpin(symbols: string[][], isQuickStop: boolean = false): void {
-        this._finalSymbols = symbols;
+        this.finalSymbols = symbols;
 
         if (isQuickStop) {
             // Rapid staggered stop: release all columns with a 50ms delay between each
             this._reels.forEach((_, i) => {
-                this._stopFlags[i] = true;
+                this.stopFlags[i] = true;
             });
         } else {
             // Sequential stop: only release the first column; others follow via markNextToStop
-            this._stopFlags[0] = true;
+            this.stopFlags[0] = true;
         }
     }
 
     /** Checks if a specific reel has met the criteria to start landing */
     public shouldStop(col: number): boolean {
-        if (!this._finalSymbols) return false;
+        if (!this.finalSymbols) return false;
 
         const elapsed = Date.now() / 1000 - this._reels[col].startTime;
-        return elapsed >= this._minSpin && this._stopFlags[col];
+        return elapsed >= this.minSpin && this.stopFlags[col];
     }
 
     /** Returns the target symbol string for a specific grid position */
     public getFinalSymbolAt(col: number, row: number): string {
-        if (!this._finalSymbols)
+        if (!this.finalSymbols)
             throw new Error("Machine: Final symbols are not set.");
         const rows = REEL_CONFIGS.machine.dimension.row;
-        return this._finalSymbols[col][(row + rows) % rows];
+        return this.finalSymbols[col][(row + rows) % rows];
     }
 
     /** Signals the next column in line that it is allowed to stop */
     public markNextToStop(col: number): void {
         const nextCol = col + 1;
         if (nextCol < this._reels.length) {
-            this._stopFlags[nextCol] = true;
+            this.stopFlags[nextCol] = true;
         }
     }
 
     /** Retrieves the next symbol from the pseudo-random grid for continuous spinning */
     public getNextSymbolAt(col: number): string {
-        const pos = this._reelPositions[col];
+        const pos = this.reelPositions[col];
         const symbol = this.pseudo[col][pos];
-        this._reelPositions[col] = (pos + 1) % this.pseudo[col].length;
+        this.reelPositions[col] = (pos + 1) % this.pseudo[col].length;
         return symbol;
     }
 
     /** Returns true if all reels have reached the STOPPED state */
     public allStopped(): boolean {
-        return this._reelStates.every((s) => s === REEL_STATES.STOPPED);
+        return this.reelStates.every((s) => s === REEL_STATES.STOPPED);
     }
 
     /** Internal helper to update state and notify the game core */
@@ -125,7 +125,7 @@ export class Machine {
         state: REEL_STATES,
         event: MACHINE_EVENTS,
     ): void {
-        this._reelStates[col] = state;
+        this.reelStates[col] = state;
         game.events.emit(GameEvent.GAME_MACHINE_ANIMATION_STATUS, {
             status: event,
             column: col,

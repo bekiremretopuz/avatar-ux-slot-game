@@ -2,9 +2,9 @@ import { Container, Text, TextStyle } from "pixi.js";
 import gsap from "gsap";
 
 export class FloatingWinText extends Container {
-    private _textObj: Text;
-    private _displayValue = { val: 0 }; // Used as a proxy for GSAP number counting animation
-    private _timeline: gsap.core.Timeline | null = null;
+    private textObj: Text;
+    private displayValue = { val: 0 }; // Used as a proxy for GSAP number counting animation
+    private timeline: gsap.core.Timeline | null = null;
 
     constructor() {
         super();
@@ -17,9 +17,9 @@ export class FloatingWinText extends Container {
             align: "center",
         });
 
-        this._textObj = new Text({ text: "", style });
-        this._textObj.anchor.set(0.5);
-        this.addChild(this._textObj);
+        this.textObj = new Text({ text: "", style });
+        this.textObj.anchor.set(0.5);
+        this.addChild(this.textObj);
         this.visible = false;
     }
 
@@ -36,23 +36,23 @@ export class FloatingWinText extends Container {
         this.visible = true;
         this.alpha = 1;
         this.y = 462; // Starting Y position
-        this._displayValue.val = 0;
-        this._textObj.text = "";
+        this.displayValue.val = 0;
+        this.textObj.text = "";
 
-        this._timeline = gsap.timeline({
+        this.timeline = gsap.timeline({
             onComplete: () => {
                 this.visible = false;
             },
         });
 
-        this._timeline
+        this.timeline
             // 1. Number counting effect
-            .to(this._displayValue, {
+            .to(this.displayValue, {
                 val: amount,
                 duration: 0.8,
                 ease: "power2.out",
                 onUpdate: () => {
-                    this._textObj.text = `${Math.floor(this._displayValue.val)}`;
+                    this.textObj.text = `${Math.floor(this.displayValue.val)}`;
                 },
             })
             // 2. Drop down and fade out effect after a 0.3s delay
@@ -69,7 +69,7 @@ export class FloatingWinText extends Container {
 
         // 3. Add the onHit callback to the timeline slightly before the drop finishes
         if (onHit) {
-            this._timeline.add(onHit, "-=0.1");
+            this.timeline.add(onHit, "-=0.1");
         }
     }
 
@@ -79,11 +79,11 @@ export class FloatingWinText extends Container {
      * to guarantee that the balance update callback (onHit) is fired.
      */
     public stopAndComplete(): void {
-        if (this._timeline) {
+        if (this.timeline) {
             // Force the timeline to its final state (triggers onHit and onComplete synchronously)
-            this._timeline.progress(1);
-            this._timeline.kill();
-            this._timeline = null;
+            this.timeline.progress(1);
+            this.timeline.kill();
+            this.timeline = null;
         }
         this.visible = false;
     }
