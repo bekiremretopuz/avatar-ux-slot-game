@@ -1,10 +1,18 @@
-import { Sprite, Texture, BlurFilter, Assets, TextStyle, Text } from "pixi.js";
+import {
+    Sprite,
+    Texture,
+    BlurFilter,
+    Assets,
+    TextStyle,
+    Text,
+    Container,
+} from "pixi.js";
 import gsap from "gsap";
 
 /**
  * Slot Symbol component with vertical blur capability and win animations
  */
-export class Symbols extends Sprite {
+export class Symbols extends Container {
     private static textureCache = new Map<string, Texture>();
 
     private readonly _blurFilter = new BlurFilter({
@@ -17,18 +25,25 @@ export class Symbols extends Sprite {
     private baseTexture: Texture;
     private winTexture: Texture;
     private lineWinText!: Text;
+    private symbolSprite!: Sprite;
 
     constructor(
         private _type: string,
         public readonly row: number,
         public readonly column: number,
     ) {
-        super(Symbols.getTexture(`${_type}.png`));
+        super();
 
-        this.anchor.set(0.5);
         this.baseTexture = Symbols.getTexture(`${_type}.png`);
         this.winTexture = this.getWinTexture(_type);
+        this.setupSprite();
         this.setupWinText();
+    }
+
+    private setupSprite(): void {
+        this.symbolSprite = new Sprite(this.baseTexture);
+        this.symbolSprite.anchor.set(0.5);
+        this.addChild(this.symbolSprite);
     }
 
     private static getTexture(name: string): Texture {
@@ -47,7 +62,6 @@ export class Symbols extends Sprite {
     private getWinTexture(type: string): Texture {
         const winName = `${type}_connect.png`;
 
-        // Check if the specific win asset is actually loaded in the Pixi cache
         if (Assets.cache.has(winName)) {
             return Texture.from(winName);
         }
@@ -75,7 +89,7 @@ export class Symbols extends Sprite {
     /** * Applies or removes the vertical blur filter based on state
      */
     public set isBlurred(value: boolean) {
-        this.filters = value ? [this._blurFilter] : [];
+        this.symbolSprite.filters = value ? [this._blurFilter] : [];
     }
 
     public get type(): string {
@@ -89,7 +103,7 @@ export class Symbols extends Sprite {
         this._type = value;
         this.baseTexture = Texture.from(`${value}.png`);
         this.winTexture = this.getWinTexture(value);
-        this.texture = this.baseTexture;
+        this.symbolSprite.texture = this.baseTexture;
     }
 
     /** * Dims the symbol to emphasize winning paylines
@@ -103,42 +117,39 @@ export class Symbols extends Sprite {
      * Gently scales up and down while flipping between active and inactive textures.
      */
     public playWinAnimation(): void {
-        // Check if a dedicated win asset actually exists to prevent useless texture assignments
         const hasSpecial = this.winTexture !== this.baseTexture;
 
         this.setDim(false);
 
-        if (hasSpecial) this.texture = this.winTexture;
+        if (hasSpecial) this.symbolSprite.texture = this.winTexture;
 
         gsap.timeline()
-            .to(this.scale, {
+            .to(this.symbolSprite.scale, {
                 x: 1.015,
                 y: 1.015,
                 duration: 0.6,
                 ease: "sine.inOut",
             })
-            .to(this.scale, {
+            .to(this.symbolSprite.scale, {
                 x: 1,
                 y: 1,
                 duration: 0.6,
                 ease: "sine.inOut",
                 onComplete: () => {
-                    if (hasSpecial) this.texture = this.baseTexture;
+                    if (hasSpecial)
+                        this.symbolSprite.texture = this.baseTexture;
                 },
             });
     }
 
     public showLineWin(amount: number): void {
-        // 1. Update content and reset properties
         this.lineWinText.text = `${amount}`;
         this.lineWinText.alpha = 1;
         this.lineWinText.position.set(0, 0); // Reset to center
         this.lineWinText.visible = true;
 
-        // 2. Kill any active tween on the text to avoid conflicts
         gsap.killTweensOf(this.lineWinText);
 
-        // 3. fade out
         gsap.to(this.lineWinText, {
             alpha: 0,
             duration: 1,
@@ -158,11 +169,10 @@ export class Symbols extends Sprite {
             this.winTween = null;
         }
 
-        this.scale.set(1);
+        this.symbolSprite.scale.set(1);
         this.alpha = 1;
-        this.texture = this.baseTexture;
+        this.symbolSprite.texture = this.baseTexture;
 
-        // Hide the floating line text immediately on reset
         this.lineWinText.visible = false;
         gsap.killTweensOf(this.lineWinText);
     }
