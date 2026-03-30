@@ -51,7 +51,7 @@ export const REEL_CONFIGS = {
         width: 200,
         height: 200,
         border: 500, // Vertical threshold for symbol recycling (2.5 * height)
-        totalHeight: 800, // Combined height of a single reel's viewable area
+        totalHeight: 800, // Combined height of a single reel's viewable area (4*height)
     },
 
     // Machine structure and initial symbol strips (Pseudo-reels)

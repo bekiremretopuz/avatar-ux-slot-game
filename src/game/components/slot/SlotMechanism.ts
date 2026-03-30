@@ -6,12 +6,14 @@ import { GameEvent } from "../../../core";
 import { SlotMath, SpinResult, WinningDetail } from "../../misc/spinMath";
 import { gsap } from "gsap";
 import { FloatingWinText } from "../FloatingText";
+import { Symbols } from "./Symbols";
 
 export class SlotMechanism extends Container {
     private machine!: Machine;
     private currentResponse: SpinResult | null = null;
-    private spinDelayCall: gsap.core.Animation | null = null;
+    private spinResponseDelayedCall: gsap.core.Animation | null = null;
     private winText!: FloatingWinText;
+    private winLoopDelayedCall: gsap.core.Animation | null = null;
 
     public postConstruct(): void {
         this.setupFrame();
@@ -46,46 +48,32 @@ export class SlotMechanism extends Container {
     public startSpin = (): void => {
         this.winText.stopAndComplete();
         this.resetSymbolsVisuals();
-
-        // Tip: In the future, consider injecting SlotMath or moving this to a Controller/Command
         this.currentResponse = SlotMath.spin(GAME_CONFIG.FIXED_BET_AMOUNT);
         console.log("Spin Response: ", this.currentResponse);
-
         this.machine.startSpin();
-
-        // Kept at 0.6 as per your functional code, updated the comment below
-        this.spinDelayCall = gsap.delayedCall(0.6, this.executeStop);
+        this.spinResponseDelayedCall = gsap.delayedCall(0.6, this.executeStop);
     };
 
-    private onAnimationStatusChange = (data: { status: string }): void => {
+    private onAnimationStatusChange = async (data: {
+        status: string;
+    }): Promise<void> => {
         if (data.status === MACHINE_EVENTS.COMPLETE) {
-            this._handleSpinComplete();
+            await this.resolveNextAction();
         }
     };
 
     /**
-     * Triggered when the machine finishes its stop animation sequence.
-     */
-    private _handleSpinComplete(): void {
-        if (!this.currentResponse) return;
-
-        // If an action (win/freespin/bonus) handles the response, we just clean up
-        this.resolveNextAction();
-        this.currentResponse = null;
-    }
-
-    /**
      * Resolves the next outcome in priority order: win first, then free spins, then bonus.
      */
-    private resolveNextAction(): boolean {
+    private async resolveNextAction(): Promise<boolean> {
         return (
-            this.resolveWinAction() ||
-            this.resolveFreeSpinAction() ||
-            this.resolveBonusAction()
+            (await this.resolveWinAction()) ||
+            (await this.resolveFreeSpinAction()) ||
+            (await this.resolveBonusAction())
         );
     }
 
-    private resolveWinAction(): boolean {
+    private async resolveWinAction(): Promise<boolean> {
         const response = this.currentResponse;
         if (!response || response.totalWin <= 0 || !response.winningDetails) {
             return false;
@@ -95,12 +83,10 @@ export class SlotMechanism extends Container {
         return true;
     }
 
-    // Placeholder for future free spin handling.
-    private resolveFreeSpinAction(): boolean {
+    private async resolveFreeSpinAction(): Promise<boolean> {
         return false;
     }
-    // Placeholder for future bonus handling.
-    private resolveBonusAction(): boolean {
+    private async resolveBonusAction(): Promise<boolean> {
         return false;
     }
 
@@ -112,42 +98,86 @@ export class SlotMechanism extends Container {
         winningDetails: WinningDetail[],
         totalWin: number,
     ): void {
-        // 1. Dim all symbols to create visual focus
-        this.machine.reels.forEach((reel) =>
-            reel.symbols.forEach((symbol) => symbol.setDim(true)),
-        );
+        // Kill previous active loop to prevent overlapping calls
+        if (this.winLoopDelayedCall) this.winLoopDelayedCall.kill();
 
-        // 2. Brighten winning symbols and play their idle loop animations
-        winningDetails.forEach((detail) => {
-            detail.winningCoords.forEach((pos) => {
+        let index = 0;
+
+        const lineCount = winningDetails.length;
+        // Map to keep track of how many times each payline has been displayed
+        const lineRepeatCount = new Map<number, number>();
+        winningDetails.forEach((_, i) => lineRepeatCount.set(i, 0));
+
+        const runLoop = () => {
+            // Loop back to the first winning line if we reach the end
+            if (index >= winningDetails.length) index = 0;
+
+            // 1. Dim all symbols to create visual focus
+            this.machine.reels.forEach((r) =>
+                r.symbols.forEach((s) => s.setDim(true)),
+            );
+
+            const currentCoords = winningDetails[index].winningCoords;
+            const symbolsInLine: Symbols[] = [];
+
+            // 2. Brighten winning symbols and play their idle loop animations
+            currentCoords.forEach((pos) => {
                 const symbol = this.machine.reels[pos.col].symbols.find(
                     (s) => s.row === pos.row,
                 );
                 if (symbol) {
-                    symbol.setDim(false);
-                    symbol.playWinAnimation();
+                    const s = symbol as Symbols;
+                    s.playWinAnimation();
+                    symbolsInLine.push(s);
                 }
             });
-        });
+
+            // Increment the display count for the current line
+            const currentCount = lineRepeatCount.get(index) || 0;
+            const newCount = currentCount + 1;
+            lineRepeatCount.set(index, newCount);
+
+            // Condition 1: There must be more than 1 winning line in total.
+            // Condition 2: This specific line must be showing at least for the 2nd time (skip on 1st loop).
+            const shouldShowText = lineCount > 1 && newCount >= 2;
+
+            if (shouldShowText) {
+                // Find the visually central symbol of the winning payline
+                const middleIndex = Math.floor(symbolsInLine.length / 2);
+                const middleSymbol = symbolsInLine[middleIndex];
+
+                if (middleSymbol) {
+                    // Trigger floating text animation directly on the symbol
+                    middleSymbol.showLineWin(winningDetails[index].amount);
+                }
+            }
+
+            index++;
+            // Schedule the next line evaluation after exactly 1.5 seconds
+            this.winLoopDelayedCall = gsap.delayedCall(1.5, runLoop);
+        };
+
+        runLoop();
 
         // 3. Trigger the floating text animation & character animation
+        game.events.emit(GameEvent.GAME_WIN_UPDATE);
         this.winText.showWin(totalWin, () => {
             game.events.emit(GameEvent.UI_WIN_UPDATE, { amount: totalWin });
         });
-
-        game.events.emit(GameEvent.GAME_WIN_UPDATE);
     }
 
     /**
      * Clears all visual states, stops GSAP tweens, and scales symbols back to default.
      */
     private resetSymbolsVisuals(): void {
+        if (this.winLoopDelayedCall) {
+            this.winLoopDelayedCall.kill();
+            this.winLoopDelayedCall = null;
+        }
+
         this.machine.reels.forEach((reel) => {
             reel.symbols.forEach((symbol) => {
-                symbol.setDim(false);
                 symbol.stopWinAnimation();
-                gsap.killTweensOf(symbol.scale);
-                symbol.scale.set(1);
             });
         });
     }
@@ -173,9 +203,9 @@ export class SlotMechanism extends Container {
      * Clears the scheduled GSAP delayed call to prevent out-of-sync stops.
      */
     private clearDelayCall(): void {
-        if (this.spinDelayCall) {
-            this.spinDelayCall.kill();
-            this.spinDelayCall = null;
+        if (this.spinResponseDelayedCall) {
+            this.spinResponseDelayedCall.kill();
+            this.spinResponseDelayedCall = null;
         }
     }
 
@@ -217,8 +247,8 @@ export class SlotMechanism extends Container {
             GameEvent.GAME_MACHINE_ANIMATION_STATUS,
             this.onAnimationStatusChange,
         );
-
         this.clearDelayCall();
+        if (this.winLoopDelayedCall) this.winLoopDelayedCall.kill();
         super.destroy(options);
     }
 }

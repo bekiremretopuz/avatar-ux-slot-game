@@ -54,25 +54,33 @@ const WILD_SYMBOL: SymbolId = "H2";
 
 // Higher weight means the symbol lands more often.
 const WEIGHTS: Record<SymbolId, number> = {
-    BONUS: 2,
-    H1: 5,
-    H2: 90,
-    H3: 10,
-    H4: 12,
-    H5: 15,
-    H6: 18,
-    M1: 20,
-    M2: 25,
-    M3: 30,
-    M4: 35,
-    M5: 40,
-    M6: 45,
-    A: 200,
-    K: 210,
-    Q: 220,
-    J: 230,
-    10: 240,
-    9: 250,
+    // ÖZEL SEMBOLLER
+    BONUS: 5, // Çok sık gelirse oyunun ayarı kaçar, 5'te kalsın.
+    H2: 90, // WILD! Devasa yaptık. Sürekli gelip küçük kazançları bağlasın.
+
+    // YÜKSEK ÖDEYENLER (Büyük Kazançlar)
+    // Bunların ağırlıklarını düşük tutuyoruz ki tek seferde kasayı patlatmasınlar.
+    H1: 10,
+    H3: 15,
+    H4: 20,
+    H5: 25,
+    H6: 30,
+
+    // ORTA VE DÜŞÜK ÖDEYENLER (İşte Sihirli Alan Burası!)
+    // Dikkat edersen hepsi birbirine çok yakın (80 ile 110 arası).
+    // Bu sayede ekranda sürekli kazanan hatlar (Line Win) oluşacak.
+    M1: 35,
+    M2: 40,
+    M3: 45,
+    M4: 50,
+    M5: 55,
+    M6: 60,
+    A: 70,
+    K: 80,
+    Q: 90,
+    J: 100,
+    10: 250,
+    9: 350,
 };
 
 // Payout multipliers based on matching 3, 4, or 5 symbols on a line.
